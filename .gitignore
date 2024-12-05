@@ -166,3 +166,5 @@ _data
 _data/
 venv
 venv/
+_*
+_*/

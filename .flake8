@@ -1,0 +1,40 @@
+[flake8]
+# 忽略的警告码
+ignore = E226,E302,E41
+
+# 排除以下目录
+exclude = 
+    .git,
+    __pycache__,
+    docs/source/conf.py,
+    build,
+    dist,
+    venv,
+    exam_c,
+    exam_p,
+    exam_gpt,
+    exam_pydantic,
+    exam_serp,
+    exam_emma,
+    exam_unstruct
+
+
+# 检查的最大复杂度
+max-complexity = 10
+
+# 每行的最大字符数
+max-line-length = 119
+
+# 检查的最大本地变量数
+max-local-variables = 15
+
+# 检查的最大分支数
+max-branches = 12
+
+# 检查的最大返回数
+max-returns = 6
+
+# 检查的最大语句数
+max-statements = 50
+
+# 检查代码

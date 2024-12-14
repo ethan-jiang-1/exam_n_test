@@ -1,5 +1,6 @@
 from typing import List
 from pydantic import BaseModel, ValidationError
+import rich
  
 class Address(BaseModel):
     street: str
@@ -11,9 +12,8 @@ class Person(BaseModel):
     is_married: bool
     address: Address
     languages: List[str]
- 
- 
-data = {
+
+data1 = {
     'age': 10,
     'name': 'John',
     'is_married': False,
@@ -23,19 +23,8 @@ data = {
     },
     'languages':['pt-pt', 'en-us']
 }
- 
-try:
-    person = Person(**data)
-    print(person.model_dump())
- 
-except ValidationError as e:
-    print("Exception as str:")
-    print(e)
-    print("Exception as json:")
-    print(e.json())
 
-
-data = {
+data2 = {
     'age': 10,
     'name': 'John',
     'is_married': False,
@@ -45,13 +34,34 @@ data = {
     },
     'languages':[{}, 'en-us']
 }
-
-try:
-    person = Person(**data)
-    print(person.model_dump())
  
-except ValidationError as e:
-    print("Exception as str:")
-    print(e)
-    print("Exception as json:")
-    print(e.json())
+def test1():
+
+    try:
+        person = Person(**data1)
+        rich.print(person)
+
+        print(person.model_dump())
+        print("done")
+    except ValidationError as e:
+        print("Exception as str:")
+        rich.print(e)
+        print("Exception as json:")
+        print(e.json())
+
+def test2():
+    try:
+        person = Person(**data2)
+        rich.print(person)
+        
+        print(person.model_dump())
+        print("done")
+    except ValidationError as e:
+        print("Exception as str:")
+        rich.print(e)
+        print("Exception as json:")
+        print(e.json())
+
+if __name__ == "__main":
+    test1()
+    test2()

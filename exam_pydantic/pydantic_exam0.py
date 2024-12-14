@@ -38,30 +38,36 @@ data2 = {
 def test1():
 
     try:
+        rich.print(data1)
         person = Person(**data1)
         rich.print(person)
 
         print(person.model_dump())
-        print("done")
+        print("test1 done")
     except ValidationError as e:
         print("Exception as str:")
         rich.print(e)
         print("Exception as json:")
         print(e.json())
+        print("test1 failed")
 
 def test2():
     try:
+        rich.print(data2)
         person = Person(**data2)
         rich.print(person)
-        
+
         print(person.model_dump())
-        print("done")
+        print("test2 done")
     except ValidationError as e:
         print("Exception as str:")
         rich.print(e)
         print("Exception as json:")
         print(e.json())
+        print("test2 failed")
 
-if __name__ == "__main":
+
+if __name__ == "__main__":
     test1()
+    print()
     test2()

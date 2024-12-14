@@ -1,6 +1,6 @@
 [flake8]
 # 忽略的警告码
-ignore = E226,E302,E41,W293
+ignore = E226,E302,E41,W293,E501,E303, C901, W292, E402, W291, E305
 
 # 排除以下目录
 exclude = 
@@ -17,6 +17,7 @@ exclude =
     exam_serp,
     exam_emma,
     exam_unstruct
+    scripy_spider.py 
 
 
 # 检查的最大复杂度

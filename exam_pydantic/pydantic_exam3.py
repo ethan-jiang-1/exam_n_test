@@ -2,6 +2,7 @@ import json
 from typing import Any, List
 
 from typing_extensions import Annotated
+import rich
 
 from pydantic import (
     BaseModel,
@@ -44,11 +45,12 @@ print(DemoModel.model_validate_json(json_str))
 
 json_str = json.dumps({'number': [2, 8]})
 json_dict = json.loads(json_str)
-print(DemoModel(**json_dict))
+rich.print(DemoModel(**json_dict))
 
 
 try:
-    DemoModel(number=['2'])
+    t1 = DemoModel(number=['2'])
+    rich.print(t1)
 except ValidationError as e:
     print(e)
     """
@@ -59,9 +61,11 @@ except ValidationError as e:
      +  where False = isinstance('2', int) [type=assertion_error, input_value='2', input_type=str]
     """
 
+print()
 
 try:
-    DemoModel(number=[2, 4])
+    t2 = DemoModel(number=[2, 4])
+    rich.print(t2)
 except ValidationError as e:
     print(e)
     """
@@ -70,3 +74,5 @@ except ValidationError as e:
       Assertion failed, 8 is not a square number
     assert ((8 ** 0.5) % 1) == 0 [type=assertion_error, input_value=4, input_type=int]
     """
+
+print()

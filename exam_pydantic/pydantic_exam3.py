@@ -37,11 +37,11 @@ class DemoModel(BaseModel):
 
 
 print(DemoModel(number=[2, 8]))
-#> number=[2, 8]
+#  > number=[2, 8]
 
 json_str = json.dumps({'number': [' 2 ', '8']})
 print(DemoModel.model_validate_json(json_str))
-#> number=[2, 8]
+#  > number=[2, 8]
 
 json_str = json.dumps({'number': [2, 8]})
 json_dict = json.loads(json_str)

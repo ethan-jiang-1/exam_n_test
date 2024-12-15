@@ -22,11 +22,16 @@ MyNumber = Annotated[int, AfterValidator(double), AfterValidator(check_squares)]
 class DemoModel(BaseModel):
     number: List[MyNumber]
 
+    def echo(self):
+        print()
+
 def test():
     t1 = DemoModel(number=[2, 8])
     rich.print(t1)
     rich.print(t1.model_dump())
     rich.print(t1.model_dump_json())
+
+    t1.echo()
 
     try:
         t2 = DemoModel(number=[2, 4])

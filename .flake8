@@ -18,6 +18,7 @@ exclude =
     exam_emma,
     exam_unstruct
     scripy_spider.py 
+    .venv
 
 
 # 检查的最大复杂度

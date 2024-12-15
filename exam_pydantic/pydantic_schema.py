@@ -42,5 +42,5 @@ main_model_schema = MainModel.model_json_schema()  # (1)!
 rich.print(main_model_schema)
 
 print()
-schema_dump2 = json.dumps(main_model_schema, indent=2)  #  (2)!
+schema_dump2 = json.dumps(main_model_schema, indent=2)  # (2)!
 rich.print(schema_dump2)

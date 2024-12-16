@@ -25,6 +25,12 @@ from pydantic_ai import Agent, ModelRetry, RunContext
 # 'if-token-present' means nothing will be sent (and the example will work) if you don't have logfire configured
 logfire.configure(send_to_logfire='if-token-present')
 
+import sys 
+
+if "./" not in sys.path:
+    sys.path.append("./")
+
+from exam_pydantic_ai.openai_model import get_model
 
 @dataclass
 class Deps:
@@ -32,22 +38,6 @@ class Deps:
     weather_api_key: str | None
     geo_api_key: str | None
 
-def get_model():
-    import openai
-    from pydantic_ai.models.openai import OpenAIModel
-    from dotenv import load_dotenv
-    load_dotenv()
-
-    # Initialize the Azure OpenAI client
-    client = openai.AsyncAzureOpenAI(
-        azure_endpoint=os.getenv("AZURE_OPENAI_BASE_URL"),
-        api_version=os.getenv("AZURE_OPENAI_VERSION"),
-        api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-    )
-
-    # Initialize the PydanticAI model with the Azure OpenAI client
-    model = OpenAIModel('gpt-4o', openai_client=client)
-    return model
 
 model = get_model()
 

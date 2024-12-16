@@ -1,23 +1,11 @@
 from pydantic_ai import Agent, RunContext
 import rich
+import sys 
 
-def get_model():
-    import os
-    import openai
-    from pydantic_ai.models.openai import OpenAIModel
-    from dotenv import load_dotenv
-    load_dotenv()
+if "./" not in sys.path:
+    sys.path.append("./")
 
-    # Initialize the Azure OpenAI client
-    client = openai.AsyncAzureOpenAI(
-        azure_endpoint=os.getenv("AZURE_OPENAI_BASE_URL"),
-        api_version=os.getenv("AZURE_OPENAI_VERSION"),
-        api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-    )
-
-    # Initialize the PydanticAI model with the Azure OpenAI client
-    model = OpenAIModel('gpt-4o', openai_client=client)
-    return model
+from exam_pydantic_ai.openai_model import get_model
 
 roulette_agent = Agent(  
     get_model(),
@@ -41,6 +29,9 @@ async def roulette_wheel(ctx: RunContext[int], square: int) -> str:
 def test1():
     # Run the agent
     success_number = 18  
+
+    #result = roulette_agent.run_sync('Put my money on square eighteen', deps=success_number)
+    #rich.print(result)
 
     result = roulette_agent.run_sync('Put my money on square eighteen', deps=success_number)
     rich.print(result)

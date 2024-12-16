@@ -17,7 +17,6 @@ from dataclasses import dataclass
 from typing import Any
 
 import logfire
-#from devtools import debug
 import rich
 from httpx import AsyncClient
 
@@ -33,25 +32,30 @@ class Deps:
     weather_api_key: str | None
     geo_api_key: str | None
 
-from openai import AzureOpenAI
-import openai
-from pydantic_ai.models.openai import OpenAIModel
-from dotenv import load_dotenv
-load_dotenv()
+#from openai import AzureOpenAI
 
 # model = AzureOpenAI(api_key=os.getenv("OPENAI_API_KEY"),
 #                         azure_endpoint=os.getenv("OPENAI_BASE_URL"),
 #                         api_version="2024-02-15-preview")
 
-# Initialize the Azure OpenAI client
-client = openai.AsyncAzureOpenAI(
-    azure_endpoint=os.getenv("OPENAI_BASE_URL"),
-    api_version="2024-02-15-preview",
-    api_key=os.getenv("OPENAI_API_KEY"),
-)
+def get_model():
+    import openai
+    from pydantic_ai.models.openai import OpenAIModel
+    from dotenv import load_dotenv
+    load_dotenv()
 
-# Initialize the PydanticAI model with the Azure OpenAI client
-model = OpenAIModel('gpt-4o', openai_client=client)
+    # Initialize the Azure OpenAI client
+    client = openai.AsyncAzureOpenAI(
+        azure_endpoint=os.getenv("OPENAI_BASE_URL"),
+        api_version="2024-10-21",
+        api_key=os.getenv("OPENAI_API_KEY"),
+    )
+
+    # Initialize the PydanticAI model with the Azure OpenAI client
+    model = OpenAIModel('gpt-4o', openai_client=client)
+    return model
+
+model = get_model()
 
 weather_agent = Agent(
     #'openai:gpt-4o',

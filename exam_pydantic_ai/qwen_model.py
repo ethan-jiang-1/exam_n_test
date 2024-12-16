@@ -18,7 +18,7 @@ if "./" not in sys.path:
 console = Console()
 
 
-async def log_response(response: httpx.Response):
+def log_response(response: httpx.Response):
     try:
         # Request Details
         request = response.request
@@ -59,7 +59,7 @@ async def log_response(response: httpx.Response):
         status_code = f"{response.status_code}"
 
         # Read the content asynchronously
-        body = await response.aread()  # Read the full body content as bytes
+        body = response.read()  # Read the full body content as bytes
         body_text = body.decode()  # Decode bytes into text
 
         # Prepare response headers to display in table

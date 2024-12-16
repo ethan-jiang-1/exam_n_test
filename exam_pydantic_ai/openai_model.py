@@ -30,6 +30,22 @@ async def log_response(response: httpx.Response):
             table.add_row(key, value)
         console.print(table)
 
+        # Print Request Body
+        if request.content:  # Check if there is a body in the request
+            console.print("\nRequest Body:\n", style="yellow")
+            request_body = request.content.decode() if isinstance(request.content, bytes) else str(request.content)
+            # Try to parse and format the request body if it's JSON
+            try:
+                request_json = json.loads(request_body)
+                formatted_request_body = json.dumps(request_json, indent=4)  # Indent for readability
+                console.print("\nFormatted JSON Request Body:\n", style="yellow")
+                console.print(formatted_request_body)
+            except json.JSONDecodeError:
+                # If it's not JSON, print the raw body
+                console.print(request_body)
+        else:
+            console.print("\nNo Request Body.\n", style="yellow")
+
     except Exception:
         print("Error occurred in request handling:")
         print(traceback.format_exc())

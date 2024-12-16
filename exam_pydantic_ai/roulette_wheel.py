@@ -18,7 +18,6 @@ roulette_agent = Agent(
     ),
 )
 
-
 @roulette_agent.tool
 async def roulette_wheel(ctx: RunContext[int], square: int) -> str:  
     """check if the square is a winner"""

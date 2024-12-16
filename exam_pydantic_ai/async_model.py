@@ -126,7 +126,9 @@ def get_qwen_model():
     )
 
     # Initialize the PydanticAI model with the Azure OpenAI client
-    model = OpenAIModel("qwen-max", openai_client=client)
+    model_name = "qwen-plus-1127"
+    #model_name = "qwen-max-latest"
+    model = OpenAIModel(model_name, openai_client=client)
     return model
 
 if __name__ == "__main__":

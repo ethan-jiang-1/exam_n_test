@@ -20,12 +20,11 @@ g_response_count = 0
 async def log_response(response: httpx.Response):
     global g_response_count 
 
-    g_response_count += 1
     print("\n\n--\n")
     try:
         # Request Details
         request = response.request
-        console.print(f"Request Details for request: {g_response_count}")
+        console.print(f">> **{g_response_count:02}**  Request Details for request", style="blue")
         table = Table(title="Request")
         table.add_column("Header", style="green", ratio=3)
         table.add_column("Value", style="cyan", ratio=7)
@@ -55,7 +54,7 @@ async def log_response(response: httpx.Response):
 
     try:
         # Response Details
-        console.print(f"\nResponse Details: {g_response_count}")
+        console.print(f"\n<< **{g_response_count:02}** Response Details", style="blue")
         table = Table(title="Response")
         table.add_column("Status Code", style="cyan")
         table.add_column("Headers", style="green")
@@ -90,6 +89,8 @@ async def log_response(response: httpx.Response):
     except Exception:
         print("Error occurred in response handling:")
         print(traceback.format_exc())
+
+    g_response_count += 1
 
 
 def get_gpt_model():

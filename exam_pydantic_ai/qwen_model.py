@@ -2,7 +2,7 @@ import sys
 import os
 import traceback
 import httpx
-import openai
+#import openai
 import json
 from pydantic_ai.models.openai import OpenAIModel
 from dotenv import load_dotenv
@@ -89,23 +89,31 @@ async def log_response(response: httpx.Response):
         print(traceback.format_exc())
 
 
-
 def get_model():
-    # Initialize the Azure OpenAI client
-    client = openai.AsyncAzureOpenAI(
-        azure_endpoint=os.getenv("AZURE_OPENAI_BASE_URL"),
-        api_version=os.getenv("AZURE_OPENAI_VERSION"),
-        api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-        http_client=httpx.AsyncClient(
+    from openai import OpenAI
+    client = OpenAI(
+        api_key=os.getenv("DASHSCOPE_API_KEY"),
+        base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
+        http_client=httpx.Client(
             event_hooks={
                 "response": [log_response]
             })
     )
 
-    # Initialize the PydanticAI model with the Azure OpenAI client
-    model = OpenAIModel('gpt-4o', openai_client=client)
-    return model
+    # # Initialize the Azure OpenAI client
+    # client = openai.AsyncAzureOpenAI(
+    #     azure_endpoint=os.getenv("AZURE_OPENAI_BASE_URL"),
+    #     api_version=os.getenv("AZURE_OPENAI_VERSION"),
+    #     api_key=os.getenv("AZURE_OPENAI_API_KEY"),
+    #     http_client=httpx.AsyncClient(
+    #         event_hooks={
+    #             "response": [log_response]
+    #         })
+    # )
 
+    # Initialize the PydanticAI model with the Azure OpenAI client
+    model = OpenAIModel("qwen-max", openai_client=client)
+    return model
 
 if __name__ == "__main__":
     model = get_model()

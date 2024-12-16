@@ -5,7 +5,8 @@ import sys
 if "./" not in sys.path:
     sys.path.append("./")
 
-from exam_pydantic_ai.openai_model import get_model
+#from exam_pydantic_ai.openai_model import get_model
+from exam_pydantic_ai.qwen_model import get_model
 
 roulette_agent = Agent(  
     get_model(),

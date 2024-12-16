@@ -5,11 +5,10 @@ import sys
 if "./" not in sys.path:
     sys.path.append("./")
 
-from exam_pydantic_ai.openai_model import get_model
-#from exam_pydantic_ai.qwen_model import get_model
+from exam_pydantic_ai.async_model import get_gpt_model
 
 roulette_agent = Agent(  
-    get_model(),
+    get_gpt_model(),
     defer_model_check=True,  
     deps_type=int,
     result_type=bool,

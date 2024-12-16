@@ -2,9 +2,7 @@ import sys
 import os
 import traceback
 import httpx
-#import openai
 import json
-from pydantic_ai.models.openai import OpenAIModel
 from dotenv import load_dotenv
 from rich.console import Console
 from rich.table import Table
@@ -17,12 +15,17 @@ if "./" not in sys.path:
 # 创建一个富文本控制台对象
 console = Console()
 
+g_response_count = 0
 
-def log_response(response: httpx.Response):
+async def log_response(response: httpx.Response):
+    global g_response_count 
+
+    g_response_count += 1
+    print("\n\n--\n")
     try:
         # Request Details
         request = response.request
-        console.print("Request Details")
+        console.print(f"Request Details for request: {g_response_count}")
         table = Table(title="Request")
         table.add_column("Header", style="green", ratio=3)
         table.add_column("Value", style="cyan", ratio=7)
@@ -52,14 +55,14 @@ def log_response(response: httpx.Response):
 
     try:
         # Response Details
-        console.print("\nResponse Details")
+        console.print(f"\nResponse Details: {g_response_count}")
         table = Table(title="Response")
         table.add_column("Status Code", style="cyan")
         table.add_column("Headers", style="green")
         status_code = f"{response.status_code}"
 
         # Read the content asynchronously
-        body = response.read()  # Read the full body content as bytes
+        body = await response.aread()  # Read the full body content as bytes
         body_text = body.decode()  # Decode bytes into text
 
         # Prepare response headers to display in table
@@ -89,32 +92,46 @@ def log_response(response: httpx.Response):
         print(traceback.format_exc())
 
 
-def get_model():
-    from openai import OpenAI
-    client = OpenAI(
-        api_key=os.getenv("DASHSCOPE_API_KEY"),
-        base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
-        http_client=httpx.Client(
+def get_gpt_model():
+    import openai
+    from pydantic_ai.models.openai import OpenAIModel
+
+    # Initialize the Azure OpenAI client
+    client = openai.AsyncAzureOpenAI(
+        azure_endpoint=os.getenv("AZURE_OPENAI_BASE_URL"),
+        api_version=os.getenv("AZURE_OPENAI_VERSION"),
+        api_key=os.getenv("AZURE_OPENAI_API_KEY"),
+        http_client=httpx.AsyncClient(
             event_hooks={
                 "response": [log_response]
             })
     )
 
-    # # Initialize the Azure OpenAI client
-    # client = openai.AsyncAzureOpenAI(
-    #     azure_endpoint=os.getenv("AZURE_OPENAI_BASE_URL"),
-    #     api_version=os.getenv("AZURE_OPENAI_VERSION"),
-    #     api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-    #     http_client=httpx.AsyncClient(
-    #         event_hooks={
-    #             "response": [log_response]
-    #         })
-    # )
+    # Initialize the PydanticAI model with the Azure OpenAI client
+    model = OpenAIModel('gpt-4o', openai_client=client)
+    return model
+
+
+def get_qwen_model():
+    import openai
+    from pydantic_ai.models.openai import OpenAIModel
+
+    client = openai.AsyncOpenAI(
+        api_key=os.getenv("DASHSCOPE_API_KEY"),
+        base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
+        http_client=httpx.AsyncClient(
+            event_hooks={
+                "response": [log_response]
+            })
+    )
 
     # Initialize the PydanticAI model with the Azure OpenAI client
     model = OpenAIModel("qwen-max", openai_client=client)
     return model
 
 if __name__ == "__main__":
-    model = get_model()
-    console.print(model)
+    model1 = get_gpt_model()
+    console.print(model1)
+
+    model2 = get_qwen_model()
+    console.print(model2)

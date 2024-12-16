@@ -10,9 +10,9 @@ def get_model():
 
     # Initialize the Azure OpenAI client
     client = openai.AsyncAzureOpenAI(
-        azure_endpoint=os.getenv("OPENAI_BASE_URL"),
-        api_version="2024-10-21",
-        api_key=os.getenv("OPENAI_API_KEY"),
+        azure_endpoint=os.getenv("AZURE_OPENAI_BASE_URL"),
+        api_version=os.getenv("AZURE_OPENAI_VERSION"),
+        api_key=os.getenv("AZURE_OPENAI_API_KEY"),
     )
 
     # Initialize the PydanticAI model with the Azure OpenAI client

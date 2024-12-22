@@ -52,7 +52,7 @@ if __name__ == '__main__':
         ]
     }
 
-    endpoint_id = os.getenv("YOUR_ENDPOINT_ID") # "{YOUR_ENDPOINT_ID}"
+    endpoint_id = os.getenv("YOUR_ENDPOINT_ID")  # "{YOUR_ENDPOINT_ID}"
     test_chat(maas, endpoint_id, req)
     test_stream_chat(maas, endpoint_id, req)
 #

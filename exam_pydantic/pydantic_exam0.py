@@ -21,7 +21,7 @@ data1 = {
         'street': 'st street',
         'building': 10
     },
-    'languages':['pt-pt', 'en-us']
+    'languages': ['pt-pt', 'en-us']
 }
 
 data2 = {
@@ -32,18 +32,21 @@ data2 = {
         'street': 'st street',
         'building': 'test'
     },
-    'languages':[{}, 'en-us']
+    'languages': [{}, 'en-us']
 }
  
-def test1():
+def func1(data=None):
+    if data is None:
+        data = data1
 
     try:
-        rich.print(data1)
-        person = Person(**data1)
+        rich.print(data)
+        person = Person(**data)
         rich.print(person)
 
         print(person.model_dump())
         print("test1 done")
+        return person.model_dump()
     except ValidationError as e:
         print("Exception as str:")
         rich.print(e)
@@ -51,14 +54,18 @@ def test1():
         print(e.json())
         print("test1 failed")
 
-def test2():
+def func2(data=None):
+    if data is None:
+        data = data2
+
     try:
-        rich.print(data2)
-        person = Person(**data2)
+        rich.print(data)
+        person = Person(**data)
         rich.print(person)
 
         print(person.model_dump())
         print("test2 done")
+        return person.model_dump()
     except ValidationError as e:
         print("Exception as str:")
         rich.print(e)
@@ -68,6 +75,6 @@ def test2():
 
 
 if __name__ == "__main__":
-    test1()
+    func1()
     print()
-    test2()
+    func2()

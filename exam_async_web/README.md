@@ -1,140 +1,135 @@
-# AsyncWebFetcher - 异步网页内容获取器
+# Async Web Fetcher
 
-这是一个基于 Python `aiohttp` 的异步网页内容获取器，支持并发获取、超时控制、自定义请求头和二进制内容下载。
+一个简单高效的异步网页内容获取工具。
 
-## 功能特性
+## 特性
 
 - ✨ 异步并发获取
 - 🔄 可控制的并发数量
 - ⏱️ 超时控制
 - 📝 自定义请求头
-- 🖼️ 二进制内容支持（如图片下载）
+- 🖼️ 二进制内容支持
 - 🚦 完善的错误处理
-- 📊 详细的获取状态
 
-## 安装依赖
+## 安装
 
 ```bash
-pip install aiohttp
+pip install exam-async-web
 ```
 
-## 使用方法
+## 快速开始
 
 ### 基本用法
 
 ```python
 import asyncio
-from async_web_fetcher import download_urls
+from exam_async_web import fetch
 
+async def main():
+    # 获取单个页面
+    result = await fetch("https://example.com")
+    print(result["content"])
+
+asyncio.run(main())
+```
+
+### 获取多个页面
+
+```python
 async def main():
     urls = [
         "https://example.com",
         "https://example.org"
     ]
-    results = await download_urls(urls)
+    results = await fetch(urls, max_concurrent=3)
     for result in results:
-        print(f"URL: {result['url']}, Status: {result['status']}")
-
-if __name__ == "__main__":
-    asyncio.run(main())
+        print(f"{result['url']}: {result['status']}")
 ```
 
-### 高级用法
+### 下载图片
 
 ```python
 async def main():
-    # 自定义配置
-    urls = ["https://example.com/image.png"]
-    results = await download_urls(
-        urls,
-        max_concurrent=3,        # 最大并发数
-        timeout=30,             # 超时时间（秒）
-        headers={               # 自定义请求头
-            "User-Agent": "CustomBot/1.0",
-            "Accept": "image/png"
-        },
-        as_binary=True         # 下载二进制内容
+    result = await fetch(
+        "https://example.com/image.png",
+        as_binary=True
+    )
+    with open("image.png", "wb") as f:
+        f.write(result["content"])
+```
+
+### 自定义请求头
+
+```python
+async def main():
+    result = await fetch(
+        "https://api.example.com",
+        headers={
+            "User-Agent": "MyBot/1.0",
+            "Accept": "application/json"
+        }
     )
 ```
 
-## API 文档
+## API 参考
 
-### AsyncWebFetcher 类
+### fetch(urls, **options)
 
-主要的内容获取器类，支持异步上下文管理器。
-
-#### 初始化参数
-
-- `max_concurrent` (int, 默认=5): 最大并发获取数
-- `timeout` (int, 默认=30): 请求超时时间（秒）
-
-#### 方法
-
-##### async fetch_page(url: str, headers: Optional[Dict] = None, as_binary: bool = False)
-
-获取单个页面内容。
+主要函数，用于获取一个或多个URL的内容。
 
 参数:
-- `url`: 目标URL
-- `headers`: 可选的请求头字典
-- `as_binary`: 是否以二进制模式获取
+- `urls`: 字符串或字符串列表，要获取的URL
+- `max_concurrent`: 整数，最大并发数（默认：5）
+- `headers`: 字典，自定义请求头
+- `timeout`: 整数，超时时间（秒）（默认：30）
+- `as_binary`: 布尔值，是否以二进制形式返回内容
 
-返回:
+返回值:
 ```python
+# 单个URL时返回字典：
 {
     "url": str,          # 请求的URL
     "status": str,       # 状态码或状态（"200"/"error"/"timeout"）
-    "content": Union[str, bytes],  # 响应内容
-    "headers": Dict      # 响应头
+    "content": str/bytes, # 响应内容
+    "headers": dict      # 响应头
 }
+
+# URL列表时返回字典列表
 ```
-
-##### async fetch_pages(urls: List[str], headers: Optional[Dict] = None, as_binary: bool = False)
-
-并发获取多个页面内容。
-
-参数:
-- `urls`: URL列表
-- `headers`: 可选的请求头字典
-- `as_binary`: 是否以二进制模式获取
-
-返回:
-- 返回结果列表，每个元素格式同 `fetch_page`
-
-### 便捷函数
-
-#### async download_urls(...)
-
-便捷的获取函数，自动处理获取器的创建和清理。
-
-参数:
-- `urls`: URL列表
-- `max_concurrent`: 最大并发数（默认=5）
-- `timeout`: 超时时间（默认=30秒）
-- `headers`: 可选的请求头字典
-- `as_binary`: 是否以二进制模式获取
 
 ## 错误处理
 
-获取器会处理以下错误情况：
-- 网络连接错误
-- DNS解析错误
-- 超时错误
-- HTTP错误（如404）
+```python
+async def main():
+    # 处理404错误
+    result = await fetch("https://example.com/not-found")
+    if result["status"] == "404":
+        print("页面不存在")
+    
+    # 处理超时
+    result = await fetch("https://slow-server.com", timeout=5)
+    if result["status"] == "timeout":
+        print("请求超时")
+```
 
-所有错误都会被捕获并返回适当的状态，不会抛出异常。
+## 开发
 
-## 示例
+1. 克隆仓库
+```bash
+git clone https://github.com/yourusername/exam-async-web.git
+cd exam-async-web
+```
 
-查看 `fetcher_demo.py` 获取完整的使用示例，包括：
-1. 普通网页获取
-2. 自定义请求头
-3. 二进制内容获取
-4. 错误处理
-5. 超时处理
+2. 安装依赖
+```bash
+pip install -e .
+```
 
-## 注意事项
+3. 运行测试
+```bash
+pytest
+```
 
-1. 使用 `AsyncWebFetcher` 时必须使用异步上下文管理器（async with）
-2. 设置合适的并发数和超时时间以避免服务器过载
-3. 获取大文件时建议使用二进制模式（as_binary=True） 
+## 许可证
+
+MIT License 

@@ -1,10 +1,27 @@
 from openai import AzureOpenAI
 import json
-from datetime import datetime
 import time
+import colorlog
+import logging
+from enum import Enum
 
 from exam_funcall_simple import config
 from exam_funcall_simple import func_simple
+
+class LogType(Enum):
+    """日志类型枚举，定义不同类型日志的级别和颜色"""
+    USER_INPUT = (logging.DEBUG, 'blue', '用户输入')          # 蓝色
+    REQUEST = (logging.INFO, 'green', '请求数据')            # 绿色
+    RESPONSE = (logging.WARNING, 'yellow', '原始响应')       # 黄色
+    FUNCTION_CALL = (logging.ERROR, 'red', '函数调用信息')   # 红色
+    FUNCTION_RESULT = (logging.CRITICAL, 'red,bg_white', '函数执行结果')  # 红底白字
+    ERROR = (logging.ERROR, 'red', '错误信息')              # 红色
+    TIMING = (logging.INFO, 'green', '执行耗时')            # 绿色
+
+    def __init__(self, level, color, title):
+        self.level = level
+        self.color = color
+        self.title = title
 
 class GPTFunctionCaller:
     def __init__(self, debug=True):
@@ -24,16 +41,43 @@ class GPTFunctionCaller:
             "calculate_circle_area": func_simple.calculate_circle_area
         }
         self.debug = debug
+        self.logger = self._setup_logger() if debug else None
         
-    def _log_debug(self, title: str, content: any):
-        """输出调试信息"""
-        if self.debug:
-            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
-            print(f"\n=== {title} === [{timestamp}]")
-            if isinstance(content, str):
-                print(content)
-            else:
-                print(json.dumps(content, indent=2, ensure_ascii=False))
+    def _setup_logger(self):
+        """设置彩色日志"""
+        logger = colorlog.getLogger('gpt_caller')
+        if not logger.handlers:
+            handler = colorlog.StreamHandler()
+            handler.setFormatter(colorlog.ColoredFormatter(
+                '%(log_color)s%(message)s%(reset)s',
+                log_colors={
+                    'DEBUG': LogType.USER_INPUT.color,
+                    'INFO': LogType.REQUEST.color,
+                    'WARNING': LogType.RESPONSE.color,
+                    'ERROR': LogType.FUNCTION_CALL.color,
+                    'CRITICAL': LogType.FUNCTION_RESULT.color,
+                }
+            ))
+            logger.addHandler(handler)
+            logger.setLevel(logging.DEBUG)
+        return logger
+                
+    def _log_debug(self, log_type: LogType, content: any):
+        """输出调试信息，使用彩色输出"""
+        if not self.debug:
+            return
+            
+        # 输出带颜色的标题
+        self.logger.log(log_type.level, f"\n=== {log_type.title} ===")
+        
+        # 输出内容
+        if isinstance(content, str):
+            self.logger.log(log_type.level, content)
+        else:
+            self.logger.log(
+                log_type.level,
+                json.dumps(content, indent=2, ensure_ascii=False)
+            )
                 
     def _format_function_call(self, function_call) -> str:
         """格式化函数调用信息"""
@@ -53,7 +97,7 @@ class GPTFunctionCaller:
             response: GPT的响应
         """
         start_time = time.time()
-        self._log_debug("用户输入", user_message)
+        self._log_debug(LogType.USER_INPUT, user_message)
         
         # 准备请求
         messages = [{"role": "user", "content": user_message}]
@@ -63,7 +107,7 @@ class GPTFunctionCaller:
             "functions": func_simple.FUNCTION_DESCRIPTIONS,
             "function_call": "auto"
         }
-        self._log_debug("请求数据", request_data)
+        self._log_debug(LogType.REQUEST, request_data)
         
         # 发送请求
         try:
@@ -71,12 +115,12 @@ class GPTFunctionCaller:
             
             # 记录响应
             response_data = response.model_dump()
-            self._log_debug("原始响应", response_data)
+            self._log_debug(LogType.RESPONSE, response_data)
             
             # 提取并记录函数调用信息
             if response.choices and response.choices[0].message.function_call:
                 self._log_debug(
-                    "函数调用信息", 
+                    LogType.FUNCTION_CALL,
                     self._format_function_call(response.choices[0].message.function_call)
                 )
                 
@@ -86,16 +130,16 @@ class GPTFunctionCaller:
                 
                 if func_name in self.available_functions:
                     function_response = self.available_functions[func_name](**func_args)
-                    self._log_debug("函数执行结果", str(function_response))
+                    self._log_debug(LogType.FUNCTION_RESULT, str(function_response))
             
             # 记录完整耗时
             elapsed_time = time.time() - start_time
-            self._log_debug("执行耗时", f"{elapsed_time:.2f} 秒")
+            self._log_debug(LogType.TIMING, f"{elapsed_time:.2f} 秒")
             
             return response
             
         except Exception as e:
-            self._log_debug("错误信息", str(e))
+            self._log_debug(LogType.ERROR, str(e))
             raise
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 from exam_funcall_simple.gpt_caller import GPTFunctionCaller
 from exam_funcall_simple import func_advanced
-from exam_funcall_simple.utils_test import print_test_header, print_user_input, print_request_data, print_api_response, print_function_result, print_execution_time, print_system_message
+from exam_funcall_simple.base_utils_test import print_test_header, print_user_input, print_request_data, print_api_response, print_function_result, print_execution_time, print_system_message
 
 def test_multisteps_reminder():
     """测试日程提醒的多步骤场景"""

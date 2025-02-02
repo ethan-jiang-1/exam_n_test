@@ -1,7 +1,7 @@
 from exam_funcall_simple.gpt_caller import GPTFunctionCaller
 from exam_funcall_simple import func_simple
 from exam_funcall_simple import func_advanced
-from exam_funcall_simple.utils_test import print_test_header, print_user_input, print_request_data, print_api_response, print_execution_time
+from exam_funcall_simple.base_utils_test import print_test_header, print_user_input, print_request_data, print_api_response, print_execution_time
 
 def test_singlestep_mixed():
     """测试时间查询、提醒设置和餐厅搜索的混合场景"""

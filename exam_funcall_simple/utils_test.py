@@ -108,15 +108,51 @@ def print_conversation_history(history: List[Dict[str, str]]):
     formatted_json = json.dumps(history, indent=2, ensure_ascii=False)
     _logger.print_panel("对话历史", formatted_json, "yellow", syntax="json")
 
-def print_request_data(request_data: Dict):
-    """打印请求数据"""
-    formatted_json = json.dumps(request_data, indent=2, ensure_ascii=False)
-    _logger.print_panel("请求数据", formatted_json, "cyan", syntax="json")
+def _serialize_object(obj):
+    """序列化对象，处理不可直接序列化的特殊对象"""
+    if hasattr(obj, "model_dump"):
+        return obj.model_dump()
+    elif hasattr(obj, "__dict__"):
+        return obj.__dict__
+    return str(obj)
 
-def print_api_response(response_data: Dict):
+def print_request_data(request_data):
+    """打印请求数据"""
+    try:
+        # 递归处理不可序列化的对象
+        def process_dict(d):
+            if isinstance(d, dict):
+                return {k: process_dict(v) for k, v in d.items()}
+            elif isinstance(d, list):
+                return [process_dict(item) for item in d]
+            else:
+                return _serialize_object(d)
+        
+        serializable_data = process_dict(request_data)
+        formatted_json = json.dumps(serializable_data, indent=2, ensure_ascii=False)
+        _logger.print_panel("请求数据", formatted_json, "cyan", syntax="json")
+    except Exception as e:
+        print(f"Error formatting request data: {str(e)}")
+        print(request_data)
+
+def print_api_response(response_data):
     """打印API响应"""
-    formatted_json = json.dumps(response_data, indent=2, ensure_ascii=False)
-    _logger.print_panel("API响应", formatted_json, "yellow", syntax="json")
+    try:
+        # 递归处理不可序列化的对象
+        def process_dict(d):
+            if isinstance(d, dict):
+                return {k: process_dict(v) for k, v in d.items()}
+            elif isinstance(d, list):
+                return [process_dict(item) for item in d]
+            else:
+                return _serialize_object(d)
+        
+        serializable_data = process_dict(response_data)
+        formatted_json = json.dumps(serializable_data, indent=2, ensure_ascii=False)
+        _logger.print_panel("API响应", formatted_json, "yellow", syntax="json")
+    except Exception as e:
+        print(f"Error formatting response data: {str(e)}")
+        print(response_data)
 
 def print_function_result(function_result: Any):
     """打印函数执行结果"""

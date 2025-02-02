@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List, Dict, Optional
 from dataclasses import dataclass
 
@@ -60,21 +60,78 @@ def schedule_reminder(
     datetime_str: str,
     priority: str = "normal",
     participants: Optional[List[str]] = None
-) -> Dict:
-    """创建日程提醒"""
+) -> str:
+    """
+    创建日程提醒
+    Args:
+        title: 提醒事项标题
+        datetime_str: 提醒时间，支持以下格式：
+            - ISO格式: YYYY-MM-DDTHH:MM:SS
+            - 相对时间: +N hours, +N minutes, +N days
+        priority: 优先级 (low/normal/high)
+        participants: 参与者邮箱列表
+    Returns:
+        str: 提醒创建成功的消息
+    """
     try:
-        reminder_time = datetime.fromisoformat(datetime_str)
-        reminder = {
-            "title": title,
-            "time": reminder_time.isoformat(),
-            "priority": priority,
-            "participants": participants or [],
-            "created_at": datetime.now().isoformat(),
-            "status": "scheduled"
-        }
-        return reminder
+        # 尝试解析相对时间
+        if datetime_str.startswith("+"):
+            # 移除多余的空格并分割
+            parts = [p for p in datetime_str.strip().split(" ") if p]
+            if len(parts) >= 2:
+                # 提取数字部分
+                number_part = ""
+                for char in parts[0][1:]:  # 跳过 "+" 符号
+                    if char.isdigit():
+                        number_part += char
+                    else:
+                        break
+                
+                if number_part:
+                    amount = int(number_part)
+                    # 获取单位部分
+                    unit = parts[1].lower() if len(parts) > 1 else "hours"
+                    
+                    now = datetime.now()
+                    if unit in ["hour", "hours"]:
+                        reminder_time = now + timedelta(hours=amount)
+                    elif unit in ["minute", "minutes"]:
+                        reminder_time = now + timedelta(minutes=amount)
+                    elif unit in ["day", "days"]:
+                        reminder_time = now + timedelta(days=amount)
+                    else:
+                        raise ValueError(f"Unsupported time unit: {unit}")
+                else:
+                    raise ValueError("No valid number found in relative time")
+            else:
+                raise ValueError("Invalid relative time format")
+        else:
+            # 尝试解析 ISO 格式
+            reminder_time = datetime.fromisoformat(datetime_str)
+        
+        # 验证时间是否在未来
+        if reminder_time <= datetime.now():
+            raise ValueError("Reminder time must be in the future")
+        
+        # 格式化提醒消息
+        time_str = reminder_time.strftime("%Y-%m-%d %H:%M:%S")
+        participants_str = ", ".join(participants) if participants else "无"
+        
+        return (
+            f"提醒创建成功:\n"
+            f"- 标题: {title}\n"
+            f"- 时间: {time_str}\n"
+            f"- 优先级: {priority}\n"
+            f"- 参与者: {participants_str}"
+        )
+        
     except ValueError as e:
-        raise ValueError(f"Invalid datetime format. Please use ISO format (YYYY-MM-DDTHH:MM:SS). Error: {str(e)}")
+        raise ValueError(
+            f"Invalid datetime format. Supported formats:\n"
+            f"1. ISO format: YYYY-MM-DDTHH:MM:SS\n"
+            f"2. Relative time: +N hours/minutes/days\n"
+            f"Error: {str(e)}"
+        )
 
 def search_restaurants(
     location: str,
@@ -160,7 +217,7 @@ ADVANCED_FUNCTION_DESCRIPTIONS = [
     },
     {
         "name": "schedule_reminder",
-        "description": "创建日程提醒",
+        "description": "创建日程提醒，支持 ISO 格式时间和相对时间（如 '+2 hours'）",
         "parameters": {
             "type": "object",
             "properties": {
@@ -170,7 +227,7 @@ ADVANCED_FUNCTION_DESCRIPTIONS = [
                 },
                 "datetime_str": {
                     "type": "string",
-                    "description": "提醒时间 (ISO格式: YYYY-MM-DDTHH:MM:SS)"
+                    "description": "提醒时间，支持两种格式：\n1. ISO格式: YYYY-MM-DDTHH:MM:SS\n2. 相对时间: +N hours/minutes/days"
                 },
                 "priority": {
                     "type": "string",
@@ -230,10 +287,10 @@ if __name__ == "__main__":
     conversion = currency_convert(100, "USD", "CNY")
     print("货币转换:", conversion)
     
-    # 测试日程提醒
+    # 测试日程提醒（使用相对时间）
     reminder = schedule_reminder(
         "团队会议",
-        "2024-02-03T14:30:00",
+        "+2 hours",
         "high",
         ["team@example.com"]
     )

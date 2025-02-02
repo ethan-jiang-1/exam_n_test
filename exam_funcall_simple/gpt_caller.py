@@ -242,8 +242,8 @@ class GPTFunctionCaller:
             request_data = {
                 "model": config.GPT4_DEPLOYMENT_NAME,
                 "messages": messages,
-                "functions": self.functions,
-                "function_call": "auto"  # 让模型自动选择是否调用函数
+                "tools": [{"type": "function", "function": f} for f in self.functions],
+                "tool_choice": "auto"  # 让模型自动选择是否调用函数
             }
             self.last_request = request_data  # 保存请求数据
             self._log_debug(LogType.REQUEST, request_data)
@@ -253,57 +253,59 @@ class GPTFunctionCaller:
             
             # 记录响应
             response_data = response.model_dump()
-            self.raw_response = response_data  # 保存原始响应
+            self.raw_response = response_data
             self._log_debug(LogType.RESPONSE, response_data)
             
             # 提取并记录函数调用信息
             if response.choices and response.choices[0].message:
                 message = response.choices[0].message
                 
-                # 处理function_call
-                if message.function_call:
-                    self._log_debug(
-                        LogType.FUNCTION_CALL,
-                        self._format_function_call(message.function_call)
-                    )
-                    
-                    # 执行函数调用
-                    func_name = message.function_call.name
-                    func_args = json.loads(message.function_call.arguments)
-                    
-                    if func_name in self.available_functions:
-                        try:
-                            function_response = self.available_functions[func_name](**func_args)
-                            self._log_debug(LogType.FUNCTION_RESULT, str(function_response))
+                # 处理tool_calls（新的多函数调用方式）
+                if message.tool_calls:
+                    for tool_call in message.tool_calls:
+                        if tool_call.type == "function":
+                            self._log_debug(
+                                LogType.FUNCTION_CALL,
+                                self._format_function_call(tool_call.function)
+                            )
                             
-                            # 如果需要继续调用其他函数，递归调用
-                            if function_response:
-                                messages.append({
-                                    "role": "assistant",
-                                    "content": None,
-                                    "function_call": {
+                            # 执行函数调用
+                            func_name = tool_call.function.name
+                            func_args = json.loads(tool_call.function.arguments)
+                            
+                            if func_name in self.available_functions:
+                                try:
+                                    function_response = self.available_functions[func_name](**func_args)
+                                    self._log_debug(LogType.FUNCTION_RESULT, str(function_response))
+                                    
+                                    # 将函数调用结果添加到消息历史
+                                    messages.append({
+                                        "role": "assistant",
+                                        "content": None,
+                                        "tool_calls": [tool_call]
+                                    })
+                                    messages.append({
+                                        "role": "tool",
+                                        "tool_call_id": tool_call.id,
                                         "name": func_name,
-                                        "arguments": message.function_call.arguments
-                                    }
-                                })
-                                messages.append({
-                                    "role": "function",
-                                    "name": func_name,
-                                    "content": str(function_response)
-                                })
-                                return self.call_with_multiple_functions(
-                                    user_message,
-                                    system_message,
-                                    messages[1:]  # 排除原始的system_message
-                                )
-                        except Exception as e:
-                            self._log_debug(LogType.ERROR, f"函数执行失败: {str(e)}")
-                            raise
-                    else:
-                        error_msg = f"未找到函数: {func_name}"
-                        self._log_debug(LogType.ERROR, error_msg)
-                        raise ValueError(error_msg)
-            
+                                        "content": str(function_response)
+                                    })
+                                except Exception as e:
+                                    self._log_debug(LogType.ERROR, str(e))
+                                    raise
+                            else:
+                                error_msg = f"未找到函数: {func_name}"
+                                self._log_debug(LogType.ERROR, error_msg)
+                                raise ValueError(error_msg)
+                
+                # 如果有函数调用结果，再次调用模型生成最终响应
+                if len(messages) > 1:  # 确保有新的消息添加
+                    final_response = self.client.chat.completions.create(
+                        model=config.GPT4_DEPLOYMENT_NAME,
+                        messages=messages
+                    )
+                    response = final_response  # 更新响应
+        
             # 记录完整耗时
             elapsed_time = time.time() - start_time
             self.execution_time = elapsed_time
@@ -312,7 +314,7 @@ class GPTFunctionCaller:
             return response
             
         except Exception as e:
-            self._log_debug(LogType.ERROR, f"调用失败: {str(e)}")
+            self._log_debug(LogType.ERROR, str(e))
             raise
 
 if __name__ == "__main__":

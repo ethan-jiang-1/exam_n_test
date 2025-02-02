@@ -1,59 +1,6 @@
 from datetime import datetime
 import math
-import colorlog
-import logging
-import functools
-import json
-from typing import Callable
-
-def setup_logger():
-    """设置彩色日志"""
-    logger = colorlog.getLogger('function_logger')
-    if not logger.handlers:
-        handler = colorlog.StreamHandler()
-        handler.setFormatter(colorlog.ColoredFormatter(
-            '%(log_color)s[%(asctime)s] %(message)s%(reset)s',
-            datefmt='%Y-%m-%d %H:%M:%S',
-            log_colors={
-                'DEBUG': 'cyan',
-                'INFO': 'green',
-                'WARNING': 'yellow',
-                'ERROR': 'red',
-                'CRITICAL': 'red,bg_white',
-            }
-        ))
-        logger.addHandler(handler)
-        logger.setLevel(logging.DEBUG)
-    return logger
-
-logger = setup_logger()
-
-def log_function_call(func: Callable) -> Callable:
-    """记录函数调用的装饰器"""
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        # 记录函数调用
-        func_name = func.__name__
-        params = {
-            "args": args,
-            "kwargs": kwargs
-        }
-        logger.info("┌──────────── 函数调用 ────────────")
-        logger.info(f"│ 函数名称: {func_name}")
-        logger.info(f"│ 调用参数: {json.dumps(params, ensure_ascii=False)}")
-        
-        try:
-            # 执行函数
-            result = func(*args, **kwargs)
-            # 记录返回值
-            logger.info(f"│ 返回结果: {result}")
-            logger.info("└─────────────────────────────")
-            return result
-        except Exception as e:
-            logger.error(f"│ 执行错误: {str(e)}")
-            logger.error("└─────────────────────────────")
-            raise
-    return wrapper
+from exam_funcall_simple.base_logger import log_function_call
 
 @log_function_call
 def get_current_time():

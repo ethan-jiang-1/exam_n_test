@@ -4,7 +4,11 @@ from rich.text import Text
 from rich.table import Table
 from rich.syntax import Syntax
 import json
-from typing import Any, Dict, Optional, List
+from typing import Any, Dict, Optional, List, Callable
+import colorlog
+import logging
+import functools
+#from datetime import datetime
 
 class TestLogger:
     def __init__(self):
@@ -90,6 +94,56 @@ class TestLogger:
 
 # 创建一个全局的TestLogger实例
 _logger = TestLogger()
+
+def setup_function_logger() -> colorlog.Logger:
+    """设置函数调用的彩色日志"""
+    logger = colorlog.getLogger('function_logger')
+    if not logger.handlers:
+        handler = colorlog.StreamHandler()
+        handler.setFormatter(colorlog.ColoredFormatter(
+            '%(log_color)s[%(asctime)s] %(message)s%(reset)s',
+            datefmt='%Y-%m-%d %H:%M:%S',
+            log_colors={
+                'DEBUG': 'cyan',
+                'INFO': 'green',
+                'WARNING': 'yellow',
+                'ERROR': 'red',
+                'CRITICAL': 'red,bg_white',
+            }
+        ))
+        logger.addHandler(handler)
+        logger.setLevel(logging.DEBUG)
+    return logger
+
+# 全局logger实例
+function_logger = setup_function_logger()
+
+def log_function_call(func: Callable) -> Callable:
+    """记录函数调用的装饰器"""
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        # 记录函数调用
+        func_name = func.__name__
+        params = {
+            "args": args,
+            "kwargs": kwargs
+        }
+        function_logger.info("┌──────────── 函数调用 ────────────")
+        function_logger.info(f"│ 函数名称: {func_name}")
+        function_logger.info(f"│ 调用参数: {json.dumps(params, ensure_ascii=False)}")
+        
+        try:
+            # 执行函数
+            result = func(*args, **kwargs)
+            # 记录返回值
+            function_logger.info(f"│ 返回结果: {result}")
+            function_logger.info("└─────────────────────────────")
+            return result
+        except Exception as e:
+            function_logger.error(f"│ 执行错误: {str(e)}")
+            function_logger.error("└─────────────────────────────")
+            raise
+    return wrapper
 
 def print_test_header(title: str):
     """打印测试标题"""

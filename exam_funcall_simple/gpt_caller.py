@@ -135,7 +135,7 @@ class GPTFunctionCaller:
                 "model": config.GPT4_DEPLOYMENT_NAME,
                 "messages": messages,
                 "functions": self.functions,
-                "function_call": "auto"
+                "function_call": "auto"  # 允许模型自由选择是否调用函数
             }
             self.last_request = request_data  # 保存请求数据
             self._log_debug(LogType.REQUEST, request_data)
@@ -149,27 +149,160 @@ class GPTFunctionCaller:
             self._log_debug(LogType.RESPONSE, response_data)
             
             # 提取并记录函数调用信息
-            if response.choices and response.choices[0].message.function_call:
-                self._log_debug(
-                    LogType.FUNCTION_CALL,
-                    self._format_function_call(response.choices[0].message.function_call)
-                )
+            if response.choices and response.choices[0].message:
+                message = response.choices[0].message
                 
-                # 执行函数调用
-                func_name = response.choices[0].message.function_call.name
-                func_args = json.loads(response.choices[0].message.function_call.arguments)
+                # 处理tool_calls（新的多函数调用方式）
+                if message.tool_calls:
+                    for tool_call in message.tool_calls:
+                        if tool_call.type == "function":
+                            self._log_debug(
+                                LogType.FUNCTION_CALL,
+                                self._format_function_call(tool_call.function)
+                            )
+                            
+                            # 执行函数调用
+                            func_name = tool_call.function.name
+                            func_args = json.loads(tool_call.function.arguments)
+                            
+                            if func_name in self.available_functions:
+                                try:
+                                    function_response = self.available_functions[func_name](**func_args)
+                                    self._log_debug(LogType.FUNCTION_RESULT, str(function_response))
+                                except Exception as e:
+                                    self._log_debug(LogType.ERROR, f"函数执行失败: {str(e)}")
+                                    raise
+                            else:
+                                error_msg = f"未找到函数: {func_name}"
+                                self._log_debug(LogType.ERROR, error_msg)
+                                raise ValueError(error_msg)
                 
-                if func_name in self.available_functions:
-                    try:
-                        function_response = self.available_functions[func_name](**func_args)
-                        self._log_debug(LogType.FUNCTION_RESULT, str(function_response))
-                    except Exception as e:
-                        self._log_debug(LogType.ERROR, f"函数执行失败: {str(e)}")
-                        raise
-                else:
-                    error_msg = f"未找到函数: {func_name}"
-                    self._log_debug(LogType.ERROR, error_msg)
-                    raise ValueError(error_msg)
+                # 处理单个function_call（旧方式，保持向后兼容）
+                elif message.function_call:
+                    self._log_debug(
+                        LogType.FUNCTION_CALL,
+                        self._format_function_call(message.function_call)
+                    )
+                    
+                    # 执行函数调用
+                    func_name = message.function_call.name
+                    func_args = json.loads(message.function_call.arguments)
+                    
+                    if func_name in self.available_functions:
+                        try:
+                            function_response = self.available_functions[func_name](**func_args)
+                            self._log_debug(LogType.FUNCTION_RESULT, str(function_response))
+                        except Exception as e:
+                            self._log_debug(LogType.ERROR, f"函数执行失败: {str(e)}")
+                            raise
+                    else:
+                        error_msg = f"未找到函数: {func_name}"
+                        self._log_debug(LogType.ERROR, error_msg)
+                        raise ValueError(error_msg)
+            
+            # 记录完整耗时
+            elapsed_time = time.time() - start_time
+            self.execution_time = elapsed_time
+            self._log_debug(LogType.TIMING, f"{elapsed_time:.2f} 秒")
+            
+            return response
+            
+        except Exception as e:
+            self._log_debug(LogType.ERROR, str(e))
+            raise
+
+    def call_with_multiple_functions(
+            self,
+            user_message: str,
+            system_message: Optional[str] = None,
+            history: Optional[List[Dict[str, str]]] = None
+    ) -> Any:
+        """
+        使用function calling功能调用GPT，支持在一次调用中执行多个函数
+        Args:
+            user_message: 用户输入的消息
+            system_message: 系统提示消息（可选）
+            history: 对话历史（可选）
+        Returns:
+            response: GPT的响应
+        """
+        start_time = time.time()
+        self._log_debug(LogType.USER_INPUT, user_message)
+        
+        try:
+            # 准备消息
+            messages = []
+            if system_message:
+                messages.append({"role": "system", "content": system_message})
+            if history:
+                messages.extend(history)
+            messages.append({"role": "user", "content": user_message})
+            
+            # 准备请求
+            request_data = {
+                "model": config.GPT4_DEPLOYMENT_NAME,
+                "messages": messages,
+                "functions": self.functions,
+                "function_call": "auto"  # 让模型自动选择是否调用函数
+            }
+            self.last_request = request_data  # 保存请求数据
+            self._log_debug(LogType.REQUEST, request_data)
+            
+            # 发送请求
+            response = self.client.chat.completions.create(**request_data)
+            
+            # 记录响应
+            response_data = response.model_dump()
+            self.raw_response = response_data  # 保存原始响应
+            self._log_debug(LogType.RESPONSE, response_data)
+            
+            # 提取并记录函数调用信息
+            if response.choices and response.choices[0].message:
+                message = response.choices[0].message
+                
+                # 处理function_call
+                if message.function_call:
+                    self._log_debug(
+                        LogType.FUNCTION_CALL,
+                        self._format_function_call(message.function_call)
+                    )
+                    
+                    # 执行函数调用
+                    func_name = message.function_call.name
+                    func_args = json.loads(message.function_call.arguments)
+                    
+                    if func_name in self.available_functions:
+                        try:
+                            function_response = self.available_functions[func_name](**func_args)
+                            self._log_debug(LogType.FUNCTION_RESULT, str(function_response))
+                            
+                            # 如果需要继续调用其他函数，递归调用
+                            if function_response:
+                                messages.append({
+                                    "role": "assistant",
+                                    "content": None,
+                                    "function_call": {
+                                        "name": func_name,
+                                        "arguments": message.function_call.arguments
+                                    }
+                                })
+                                messages.append({
+                                    "role": "function",
+                                    "name": func_name,
+                                    "content": str(function_response)
+                                })
+                                return self.call_with_multiple_functions(
+                                    user_message,
+                                    system_message,
+                                    messages[1:]  # 排除原始的system_message
+                                )
+                        except Exception as e:
+                            self._log_debug(LogType.ERROR, f"函数执行失败: {str(e)}")
+                            raise
+                    else:
+                        error_msg = f"未找到函数: {func_name}"
+                        self._log_debug(LogType.ERROR, error_msg)
+                        raise ValueError(error_msg)
             
             # 记录完整耗时
             elapsed_time = time.time() - start_time

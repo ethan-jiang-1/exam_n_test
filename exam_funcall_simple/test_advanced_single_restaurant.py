@@ -29,7 +29,7 @@ def test_advanced_single_restaurant():
     if response.choices and response.choices[0].message and response.choices[0].message.function_call:
         print_function_result(response.choices[0].message.function_call)
     
-    print_execution_time(caller.last_execution_time)
+    print_execution_time(caller.execution_time)
 
 if __name__ == "__main__":
     test_advanced_single_restaurant() 

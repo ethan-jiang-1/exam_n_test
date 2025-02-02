@@ -30,7 +30,7 @@ def test_multisteps_mixed_functions():
     print_user_input(user_input)
     
     # 步骤1.1：获取当前时间
-    print_test_header("步骤1.1：获取当前时间", level=2)
+    print_test_header("步骤1.1：获取当前时间")
     response = caller.call_with_functions(
         user_input,
         system_message="请使用get_current_time函数获取当前时间。不要使用其他函数。"
@@ -42,10 +42,10 @@ def test_multisteps_mixed_functions():
     if response.choices and response.choices[0].message and response.choices[0].message.function_call:
         print_function_result(response.choices[0].message.function_call)
     
-    print_execution_time(caller.last_execution_time)
+    print_execution_time(caller.execution_time)
     
     # 步骤1.2：查询北京天气
-    print_test_header("步骤1.2：查询北京天气", level=2)
+    print_test_header("步骤1.2：查询北京天气")
     response = caller.call_with_functions(
         user_input,
         system_message="请使用get_weather函数查询北京的天气。不要使用其他函数。"
@@ -57,7 +57,7 @@ def test_multisteps_mixed_functions():
     if response.choices and response.choices[0].message and response.choices[0].message.function_call:
         print_function_result(response.choices[0].message.function_call)
     
-    print_execution_time(caller.last_execution_time)
+    print_execution_time(caller.execution_time)
     
     # 场景2：圆面积和货币转换多步骤查询
     print_test_header("场景2：圆面积和货币转换多步骤查询")
@@ -65,7 +65,7 @@ def test_multisteps_mixed_functions():
     print_user_input(user_input)
     
     # 步骤2.1：计算圆面积
-    print_test_header("步骤2.1：计算圆面积", level=2)
+    print_test_header("步骤2.1：计算圆面积")
     response = caller.call_with_functions(
         user_input,
         system_message="请使用calculate_circle_area函数计算半径为10的圆的面积。不要使用其他函数。"
@@ -77,10 +77,10 @@ def test_multisteps_mixed_functions():
     if response.choices and response.choices[0].message and response.choices[0].message.function_call:
         print_function_result(response.choices[0].message.function_call)
     
-    print_execution_time(caller.last_execution_time)
+    print_execution_time(caller.execution_time)
     
     # 步骤2.2：进行货币转换
-    print_test_header("步骤2.2：进行货币转换", level=2)
+    print_test_header("步骤2.2：进行货币转换")
     response = caller.call_with_functions(
         user_input,
         system_message="请使用currency_convert函数将100美元转换为人民币。不要使用其他函数。"
@@ -92,7 +92,7 @@ def test_multisteps_mixed_functions():
     if response.choices and response.choices[0].message and response.choices[0].message.function_call:
         print_function_result(response.choices[0].message.function_call)
     
-    print_execution_time(caller.last_execution_time)
+    print_execution_time(caller.execution_time)
 
 if __name__ == "__main__":
     test_multisteps_mixed_functions() 

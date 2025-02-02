@@ -13,7 +13,7 @@ def test_multisteps_currency():
     )
     
     # 场景1：美元到人民币转换
-    print_test_header("场景1：美元到人民币转换", level=2)
+    print_test_header("场景1：美元到人民币转换")
     user_input = "把100美元换算成人民币"
     print_user_input(user_input)
     
@@ -28,10 +28,10 @@ def test_multisteps_currency():
     if response.choices and response.choices[0].message and response.choices[0].message.function_call:
         print_function_result(response.choices[0].message.function_call)
     
-    print_execution_time(caller.last_execution_time)
+    print_execution_time(caller.execution_time)
     
     # 场景2：欧元到日元转换
-    print_test_header("场景2：欧元到日元转换", level=2)
+    print_test_header("场景2：欧元到日元转换")
     user_input = "将50欧元换成日元"
     print_user_input(user_input)
     
@@ -46,7 +46,7 @@ def test_multisteps_currency():
     if response.choices and response.choices[0].message and response.choices[0].message.function_call:
         print_function_result(response.choices[0].message.function_call)
     
-    print_execution_time(caller.last_execution_time)
+    print_execution_time(caller.execution_time)
 
 if __name__ == "__main__":
     test_multisteps_currency() 

@@ -13,7 +13,7 @@ def test_multisteps_restaurant():
     )
     
     # 场景1：基本餐厅搜索
-    print_test_header("场景1：基本餐厅搜索", level=2)
+    print_test_header("场景1：基本餐厅搜索")
     user_input = "在北京找一家好评分高于4分的中餐馆"
     print_user_input(user_input)
     
@@ -28,10 +28,10 @@ def test_multisteps_restaurant():
     if response.choices and response.choices[0].message and response.choices[0].message.function_call:
         print_function_result(response.choices[0].message.function_call)
     
-    print_execution_time(caller.last_execution_time)
+    print_execution_time(caller.execution_time)
     
     # 场景2：带价格范围的搜索
-    print_test_header("场景2：带价格范围的搜索", level=2)
+    print_test_header("场景2：带价格范围的搜索")
     user_input = "找一家北京的高档意大利餐厅，价格不限"
     print_user_input(user_input)
     
@@ -46,7 +46,7 @@ def test_multisteps_restaurant():
     if response.choices and response.choices[0].message and response.choices[0].message.function_call:
         print_function_result(response.choices[0].message.function_call)
     
-    print_execution_time(caller.last_execution_time)
+    print_execution_time(caller.execution_time)
 
 if __name__ == "__main__":
     test_multisteps_restaurant() 

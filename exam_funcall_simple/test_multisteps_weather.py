@@ -13,7 +13,7 @@ def test_multisteps_weather():
     )
     
     # 场景1：查询国内城市天气
-    print_test_header("场景1：查询国内城市天气", level=2)
+    print_test_header("场景1：查询国内城市天气")
     user_input = "北京今天天气怎么样？"
     print_user_input(user_input)
     
@@ -28,10 +28,10 @@ def test_multisteps_weather():
     if response.choices and response.choices[0].message and response.choices[0].message.function_call:
         print_function_result(response.choices[0].message.function_call)
     
-    print_execution_time(caller.last_execution_time)
+    print_execution_time(caller.execution_time)
     
     # 场景2：查询国外城市天气
-    print_test_header("场景2：查询国外城市天气", level=2)
+    print_test_header("场景2：查询国外城市天气")
     user_input = "查询东京(JP)的天气"
     print_user_input(user_input)
     
@@ -46,7 +46,7 @@ def test_multisteps_weather():
     if response.choices and response.choices[0].message and response.choices[0].message.function_call:
         print_function_result(response.choices[0].message.function_call)
     
-    print_execution_time(caller.last_execution_time)
+    print_execution_time(caller.execution_time)
 
 if __name__ == "__main__":
     test_multisteps_weather() 

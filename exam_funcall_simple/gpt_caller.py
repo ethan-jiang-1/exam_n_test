@@ -4,6 +4,7 @@ import time
 import colorlog
 import logging
 from enum import Enum
+from typing import Dict, List, Any, Optional
 
 from exam_funcall_simple import config
 from exam_funcall_simple import func_simple
@@ -24,11 +25,18 @@ class LogType(Enum):
         self.title = title
 
 class GPTFunctionCaller:
-    def __init__(self, debug=True):
+    def __init__(
+            self,
+            functions: List[Dict],
+            function_map: Dict[str, callable],
+            debug: bool = True
+    ):
         """
         初始化GPT函数调用器
         Args:
-            debug (bool): 是否启用调试模式，显示详细日志
+            functions: Function descriptions 列表
+            function_map: 函数名到实际函数的映射
+            debug: 是否启用调试模式
         """
         self.client = AzureOpenAI(
             api_key=config.AZURE_OPENAI_API_KEY,
@@ -36,10 +44,8 @@ class GPTFunctionCaller:
             azure_endpoint=config.AZURE_OPENAI_ENDPOINT
         )
         
-        self.available_functions = {
-            "get_current_time": func_simple.get_current_time,
-            "calculate_circle_area": func_simple.calculate_circle_area
-        }
+        self.functions = functions
+        self.available_functions = function_map
         self.debug = debug
         self.logger = self._setup_logger() if debug else None
         
@@ -88,23 +94,37 @@ class GPTFunctionCaller:
             f"Arguments: {function_call.arguments}"
         )
 
-    def call_with_functions(self, user_message: str):
+    def call_with_functions(
+            self,
+            user_message: str,
+            system_message: Optional[str] = None,
+            history: Optional[List[Dict[str, str]]] = None
+    ) -> Any:
         """
         使用function calling功能调用GPT
         Args:
-            user_message (str): 用户输入的消息
+            user_message: 用户输入的消息
+            system_message: 系统提示消息（可选）
+            history: 对话历史（可选）
         Returns:
             response: GPT的响应
         """
         start_time = time.time()
         self._log_debug(LogType.USER_INPUT, user_message)
         
+        # 准备消息
+        messages = []
+        if system_message:
+            messages.append({"role": "system", "content": system_message})
+        if history:
+            messages.extend(history)
+        messages.append({"role": "user", "content": user_message})
+        
         # 准备请求
-        messages = [{"role": "user", "content": user_message}]
         request_data = {
             "model": config.GPT4_DEPLOYMENT_NAME,
             "messages": messages,
-            "functions": func_simple.FUNCTION_DESCRIPTIONS,
+            "functions": self.functions,
             "function_call": "auto"
         }
         self._log_debug(LogType.REQUEST, request_data)
@@ -143,14 +163,23 @@ class GPTFunctionCaller:
             raise
 
 if __name__ == "__main__":
-    # 测试不同场景
-    caller = GPTFunctionCaller(debug=True)
+    # 创建简单函数调用器用于测试
+    caller = GPTFunctionCaller(
+        functions=func_simple.FUNCTION_DESCRIPTIONS,
+        function_map={
+            "get_current_time": func_simple.get_current_time,
+            "calculate_circle_area": func_simple.calculate_circle_area
+        }
+    )
     
+    # 测试时间查询
     print("\n=== 测试时间查询 ===")
-    response = caller.call_with_functions("现在几点了？")
+    caller.call_with_functions("现在几点了？")
     
+    # 测试圆面积计算
     print("\n=== 测试圆面积计算 ===")
-    response = caller.call_with_functions("计算半径为3.5的圆的面积")
+    caller.call_with_functions("计算半径为3.5的圆的面积")
     
+    # 测试普通对话
     print("\n=== 测试普通对话 ===")
-    response = caller.call_with_functions("你好，请介绍一下你自己") 
+    caller.call_with_functions("你好，请介绍一下你自己") 

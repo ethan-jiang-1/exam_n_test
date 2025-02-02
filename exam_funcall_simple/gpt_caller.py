@@ -134,8 +134,8 @@ class GPTFunctionCaller:
             request_data = {
                 "model": config.GPT4_DEPLOYMENT_NAME,
                 "messages": messages,
-                "functions": self.functions,
-                "function_call": "auto"  # 允许模型自由选择是否调用函数
+                "tools": [{"type": "function", "function": f} for f in self.functions],
+                "tool_choice": "auto"
             }
             self.last_request = request_data  # 保存请求数据
             self._log_debug(LogType.REQUEST, request_data)

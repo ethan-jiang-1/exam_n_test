@@ -1,6 +1,6 @@
 from exam_funcall_simple.gpt_caller import GPTFunctionCaller
 from exam_funcall_simple import func_advanced
-from exam_funcall_simple.base_utils_test import print_test_header, print_user_input, print_request_data, print_api_response, print_function_result, print_execution_time
+from exam_funcall_simple.base_logger import print_test_header, print_user_input, print_request_data, print_api_response, print_function_result, print_execution_time
 
 def test_multisteps_weather():
     """测试天气查询的多步骤场景"""

@@ -48,6 +48,9 @@ class GPTFunctionCaller:
         self.available_functions = function_map
         self.debug = debug
         self.logger = self._setup_logger() if debug else None
+        self.last_request = None
+        self.raw_response = None
+        self.execution_time = 0.0  # 添加execution_time属性
         
     def _setup_logger(self):
         """设置彩色日志"""
@@ -134,6 +137,7 @@ class GPTFunctionCaller:
                 "functions": self.functions,
                 "function_call": "auto"
             }
+            self.last_request = request_data  # 保存请求数据
             self._log_debug(LogType.REQUEST, request_data)
             
             # 发送请求
@@ -141,6 +145,7 @@ class GPTFunctionCaller:
             
             # 记录响应
             response_data = response.model_dump()
+            self.raw_response = response_data  # 保存原始响应
             self._log_debug(LogType.RESPONSE, response_data)
             
             # 提取并记录函数调用信息
@@ -168,6 +173,7 @@ class GPTFunctionCaller:
             
             # 记录完整耗时
             elapsed_time = time.time() - start_time
+            self.execution_time = elapsed_time
             self._log_debug(LogType.TIMING, f"{elapsed_time:.2f} 秒")
             
             return response

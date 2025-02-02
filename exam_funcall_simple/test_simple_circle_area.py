@@ -1,10 +1,13 @@
-import json
 from exam_funcall_simple.gpt_caller import GPTFunctionCaller
 from exam_funcall_simple import func_simple
+from exam_funcall_simple.test_utils import print_test_header, print_user_input, print_request_data, print_api_response, print_function_result, print_execution_time
 
 def test_circle_area():
     """测试圆面积计算功能"""
-    print("\n=== 测试圆面积计算 ===")
+    print_test_header("圆面积计算")
+    
+    user_input = "计算半径为5的圆的面积"
+    print_user_input(user_input)
     
     caller = GPTFunctionCaller(
         functions=func_simple.FUNCTION_DESCRIPTIONS,
@@ -13,8 +16,17 @@ def test_circle_area():
             "calculate_circle_area": func_simple.calculate_circle_area
         }
     )
-    response = caller.call_with_functions("计算半径为5的圆的面积")
-    print("Circle area response:", json.dumps(response.model_dump(), indent=2, ensure_ascii=False))
+    
+    response = caller.call_with_functions(user_input)
+    
+    print_request_data(caller.last_request)
+    print_api_response(caller.raw_response)
+    
+    if response.choices and response.choices[0].message.function_call:
+        print_function_result(response.choices[0].message.function_call)
+    
+    print_execution_time(caller.execution_time)
+    print("\n✓ 圆面积计算测试完成\n")
 
 if __name__ == "__main__":
     test_circle_area() 

@@ -10,7 +10,7 @@ exam_funcall_simple/
 ├── func_simple.py         # 简单函数实现
 ├── func_advanced.py       # 高级函数实现
 ├── config.py             # 配置文件
-├── test_utils.py         # 测试辅助函数
+├── utils_test.py         # 测试辅助函数
 ├── test_simple_*.py      # 简单函数单步测试
 ├── test_advanced_*.py    # 高级函数单步测试
 ├── test_multisteps_*.py  # 多步骤测试场景
@@ -26,7 +26,7 @@ exam_funcall_simple/
 4. 便于调试和修改
 
 ### 单步测试文件
-- 每个文件只测试一个LLM调用场景
+- 每个文件只允许一次LLM调用（即只能有一个`caller.call_with_functions`调用）
 - 文件名清晰表明测试内容
 - 测试代码简单直观
 - 运行结果格式化输出
@@ -35,7 +35,8 @@ exam_funcall_simple/
 ### 多步骤测试文件
 - 用于测试需要多次LLM调用的场景
 - 文件名以`test_multisteps_`开头
-- 每个步骤都有清晰的注释
+- 允许多次调用`caller.call_with_functions`
+- 每个步骤都有清晰的注释和说明
 - 适用于：多轮对话、组合功能等
 - 示例：`test_multisteps_mixed_functions.py`
 
@@ -80,10 +81,11 @@ AZURE_OPENAI_VERSION=2024-02-15-preview
    - 多步骤测试：`test_multisteps_*.py`
 
 2. 代码规范
-   - 每个测试文件都应该可以独立运行
+   - 单步测试文件只能包含一个`caller.call_with_functions`调用
+   - 多步骤测试文件中的每个`call_with_functions`调用都要有明确的目的说明
    - 测试代码应该简单明了
    - 关键步骤要有注释说明
-   - 使用test_utils中的函数格式化输出
+   - 使用utils_test中的函数格式化输出
 
 3. 输出规范
    - 测试开始时显示测试名称

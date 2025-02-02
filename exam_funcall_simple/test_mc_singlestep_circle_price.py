@@ -3,10 +3,35 @@ from exam_funcall_simple import func_simple
 from exam_funcall_simple import func_advanced
 from exam_funcall_simple.base_logger import print_test_header, print_user_input, print_request_data, print_api_response, print_execution_time, TestLogger
 import json
+from string import Template
+
+# 模板定义
+TEMPLATES = {
+    "system_message": Template("""
+这是一个多函数调用测试。请在一次调用中完成以下任务：
+1) 使用calculate_circle_area计算半径为${radius}米的圆形桌子面积
+2) 使用currency_convert将${amount}${from_currency}转换为${to_currency}
+""".strip()),
+
+    "result_message": Template("""计算结果：
+1. 圆形餐桌面积：${area} 平方米
+2. 价格转换：${original_amount} ${from_currency} = ${converted_amount} ${to_currency}
+   (使用汇率：1 ${from_currency} = ${rate} ${to_currency})""")
+}
 
 def test_singlestep_circle_price():
     """测试圆形桌子面积计算和价格转换"""
     print_test_header("测试圆形桌子面积计算和价格转换")
+    
+    # 测试参数
+    test_params = {
+        "radius": 0.8,
+        "amount": 230,
+        "from_currency": "EUR",
+        "to_currency": "CNY",
+        "from_currency_name": "欧元",
+        "to_currency_name": "人民币"
+    }
     
     # 初始化函数调用器
     function_map = {
@@ -23,13 +48,21 @@ def test_singlestep_circle_price():
     )
     
     # 测试输入
-    user_input = "一张圆形餐桌半径是0.8米，这张桌子在欧洲的价格是230欧元，请帮我计算桌子的面积，并把价格转换成人民币。"
+    user_input = f"一张圆形餐桌半径是{test_params['radius']}米，这张桌子在欧洲的价格是{test_params['amount']}{test_params['from_currency_name']}，请帮我计算桌子的面积，并把价格转换成{test_params['to_currency_name']}。"
     print_user_input(user_input)
+    
+    # 生成系统消息
+    system_message = TEMPLATES["system_message"].substitute(
+        radius=test_params["radius"],
+        amount=test_params["amount"],
+        from_currency=test_params["from_currency"],
+        to_currency=test_params["to_currency"]
+    )
     
     # 执行调用
     response = caller.call_with_functions(
         user_input,
-        system_message="这是一个多函数调用测试。请在一次调用中完成以下任务：1) 使用calculate_circle_area计算圆形桌子的面积；2) 使用currency_convert将230欧元转换为人民币"
+        system_message=system_message
     )
     
     # 输出结果
@@ -55,12 +88,14 @@ def test_singlestep_circle_price():
                 price_result = function_map[func_name](**func_args)
         
         if area_result is not None and price_result is not None:
-            # 格式化结果消息
-            result_message = (
-                f"计算结果：\n"
-                f"1. 圆形餐桌面积：{area_result:.2f}平方米\n"
-                f"2. 价格转换：{price_result['original_amount']}欧元 = {price_result['converted_amount']}人民币\n"
-                f"   (使用汇率：1欧元 = {price_result['rate']}人民币)"
+            # 使用模板格式化结果消息
+            result_message = TEMPLATES["result_message"].substitute(
+                area=f"{area_result:.2f}",
+                original_amount=price_result["original_amount"],
+                from_currency=test_params["from_currency_name"],
+                converted_amount=f"{price_result['converted_amount']:.2f}",
+                to_currency=test_params["to_currency_name"],
+                rate=f"{price_result['rate']:.3f}"
             )
             logger.print_panel("最终结果", result_message, "green")
             logger.print_success("所有计算已完成")

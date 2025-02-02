@@ -120,10 +120,24 @@ def print_api_response(response_data: Dict):
 
 def print_function_result(function_result: Any):
     """打印函数执行结果"""
-    if isinstance(function_result, (dict, list)):
+    if hasattr(function_result, 'name') and hasattr(function_result, 'arguments'):
+        # 处理function_call对象
+        try:
+            args_dict = json.loads(function_result.arguments)
+            result_str = json.dumps({
+                "函数名称": function_result.name,
+                "函数参数": args_dict
+            }, indent=2, ensure_ascii=False)
+        except json.JSONDecodeError:
+            result_str = json.dumps({
+                "函数名称": function_result.name,
+                "函数参数": function_result.arguments
+            }, indent=2, ensure_ascii=False)
+    elif isinstance(function_result, (dict, list)):
         result_str = json.dumps(function_result, indent=2, ensure_ascii=False)
     else:
         result_str = str(function_result)
+    
     _logger.print_panel("函数执行结果", result_str, "green", syntax="json")
     
     # 如果是字典类型，还要打印表格形式

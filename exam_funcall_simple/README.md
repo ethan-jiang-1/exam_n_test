@@ -10,11 +10,28 @@ exam_funcall_simple/
 ├── func_simple.py         # 简单函数实现
 ├── func_advanced.py       # 高级函数实现
 ├── config.py             # 配置文件
-├── test_simple_*.py      # 简单函数测试文件
-├── test_advanced_*.py    # 高级函数测试文件
-├── test_mixed_*.py       # 混合函数测试文件
+├── test_simple_*.py      # 简单函数单步测试
+├── test_advanced_*.py    # 高级函数单步测试
+├── test_multisteps_*.py  # 多步骤测试场景
 └── run_*.py             # 测试运行器
 ```
+
+## 测试设计指南
+
+### 单步测试原则
+1. 每个测试文件应专注于测试单个LLM调用场景
+2. 测试文件命名应清晰表明被测试的功能，如 `test_simple_time_query.py`
+3. 测试代码应该简洁明了，便于理解和维护
+4. 输出结果应该清晰展示每个步骤的细节
+
+### 多步骤测试原则
+1. 对于需要多次LLM调用的复杂场景，使用 `test_multisteps_*.py` 命名
+2. 多步骤测试应该清晰地划分每个步骤
+3. 每个步骤的输入输出都应该有清晰的注释和说明
+4. 适用场景示例：
+   - 多轮对话测试
+   - 组合功能测试
+   - 上下文依赖测试
 
 ## 功能说明
 
@@ -49,7 +66,7 @@ python -m exam_funcall_simple.run_advanced_tests
 ```bash
 python -m exam_funcall_simple.test_simple_time_query
 python -m exam_funcall_simple.test_advanced_weather
-python -m exam_funcall_simple.test_mixed_functions
+python -m exam_funcall_simple.test_multisteps_conversation
 ```
 
 ## 配置说明
@@ -64,7 +81,8 @@ AZURE_OPENAI_VERSION=2024-02-15-preview
 
 ## 注意事项
 
-1. 所有测试文件都可以独立运行
-2. 每个测试文件都包含多个测试场景
-3. 日志输出采用彩色格式，便于查看
-4. 所有函数都有详细的文档字符串 
+1. 单步测试文件应该只包含一个LLM调用
+2. 多步骤测试文件应该清晰标注每个步骤的目的
+3. 测试结果输出采用结构化格式，便于分析
+4. 所有函数都有详细的文档字符串
+5. 测试用例应该包含典型场景和边界情况 

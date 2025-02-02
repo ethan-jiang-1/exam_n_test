@@ -220,10 +220,7 @@ class GPTFunctionCaller(GPTBase):
             if self.functions and (force_function_call or "function" in user_message.lower()):
                 request_data.update({
                     "tools": [{"type": "function", "function": f} for f in self.functions],
-                    "tool_choice": {
-                        "type": "function",
-                        "function": {"name": self.functions[0]["name"]}  # 默认使用第一个函数
-                    } if force_function_call else "auto"
+                    "tool_choice": "auto"  # 让模型自动选择函数
                 })
             self.last_request = request_data  # 保存请求数据
             self._log_debug(LogType.REQUEST, request_data)

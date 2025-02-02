@@ -13,10 +13,10 @@ def test_advanced_single_reminder():
     )
     
     # 测试输入
-    system_message = "当前时间是2024年2月2日。请直接使用schedule_reminder函数创建提醒，对于未提供的参数使用默认值。不要询问更多信息。"
+    system_message = "请直接使用schedule_reminder函数创建提醒，对于未提供的参数使用默认值。不要询问更多信息。"
     print_system_message(system_message)
     
-    user_input = "帮我设置一个明天下午3点的团队会议提醒"
+    user_input = "帮我设置一个2小时后的团队会议提醒"
     print_user_input(user_input)
     
     # 执行调用

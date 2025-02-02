@@ -31,28 +31,29 @@ def get_weather(city: str, country: str = "CN") -> WeatherInfo:
 def currency_convert(amount: float, from_currency: str, to_currency: str) -> Dict:
     """货币转换功能"""
     # 模拟汇率API调用
-    rates = {
-        "USD_CNY": 6.45,
-        "EUR_CNY": 7.85,
-        "JPY_CNY": 0.059,
-        "CNY_USD": 0.155,
-        "CNY_EUR": 0.127,
-        "CNY_JPY": 16.95
+    # 基准汇率（以CNY为基准）
+    base_rates = {
+        "USD": 0.155,  # 1 CNY = 0.155 USD
+        "EUR": 0.127,  # 1 CNY = 0.127 EUR
+        "JPY": 16.95,  # 1 CNY = 16.95 JPY
+        "CNY": 1.0     # 1 CNY = 1.0 CNY
     }
     
-    rate_key = f"{from_currency}_{to_currency}"
-    if rate_key in rates:
-        converted = amount * rates[rate_key]
-        return {
-            "original_amount": amount,
-            "converted_amount": round(converted, 2),
-            "from_currency": from_currency,
-            "to_currency": to_currency,
-            "rate": rates[rate_key],
-            "timestamp": datetime.now().isoformat()
-        }
-    else:
-        raise ValueError(f"Unsupported currency pair: {rate_key}")
+    if from_currency not in base_rates or to_currency not in base_rates:
+        raise ValueError(f"Unsupported currency: {from_currency} or {to_currency}")
+    
+    # 先转换为CNY，再转换为目标货币
+    amount_in_cny = amount / base_rates[from_currency]
+    converted = amount_in_cny * base_rates[to_currency]
+    
+    return {
+        "original_amount": amount,
+        "converted_amount": round(converted, 2),
+        "from_currency": from_currency,
+        "to_currency": to_currency,
+        "rate": round(base_rates[to_currency] / base_rates[from_currency], 4),
+        "timestamp": datetime.now().isoformat()
+    }
 
 def schedule_reminder(
     title: str,

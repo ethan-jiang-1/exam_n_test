@@ -95,7 +95,7 @@ class TestLogger:
 # 创建一个全局的TestLogger实例
 _logger = TestLogger()
 
-def setup_function_logger() -> colorlog.Logger:
+def setup_function_logger() -> logging.Logger:
     """设置函数调用的彩色日志"""
     logger = colorlog.getLogger('function_logger')
     if not logger.handlers:

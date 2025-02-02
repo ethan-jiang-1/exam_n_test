@@ -3,8 +3,8 @@ from exam_funcall_simple import func_advanced
 from exam_funcall_simple.utils_test import print_test_header, print_user_input, print_request_data, print_api_response, print_function_result, print_execution_time
 
 def test_advanced_single_restaurant():
-    """测试餐厅搜索功能（单步测试）"""
-    print_test_header("测试餐厅搜索功能")
+    """测试场景：搜索特定条件的餐厅"""
+    print_test_header("餐厅搜索功能测试")
     
     # 初始化函数调用器
     caller = GPTFunctionCaller(
@@ -12,17 +12,17 @@ def test_advanced_single_restaurant():
         function_map={"search_restaurants": func_advanced.search_restaurants}
     )
     
-    # 测试场景：基本餐厅搜索
+    # 测试输入
     user_input = "在北京找一家好评分高于4分的中餐馆"
     print_user_input(user_input)
     
-    # 执行搜索
+    # 执行调用
     response = caller.call_with_functions(
         user_input,
         system_message="请使用search_restaurants函数搜索餐厅。"
     )
     
-    # 打印详细信息
+    # 输出结果
     print_request_data(caller.last_request)
     print_api_response(caller.raw_response)
     

@@ -3,8 +3,8 @@ from exam_funcall_simple import func_advanced
 from exam_funcall_simple.utils_test import print_test_header, print_user_input, print_request_data, print_api_response, print_function_result, print_execution_time
 
 def test_advanced_single_currency():
-    """测试货币转换功能（单步测试）"""
-    print_test_header("测试货币转换功能")
+    """测试场景：美元到人民币的货币转换"""
+    print_test_header("货币转换功能测试")
     
     # 初始化函数调用器
     caller = GPTFunctionCaller(
@@ -12,17 +12,17 @@ def test_advanced_single_currency():
         function_map={"currency_convert": func_advanced.currency_convert}
     )
     
-    # 测试场景：美元到人民币转换
+    # 测试输入
     user_input = "把100美元换算成人民币"
     print_user_input(user_input)
     
-    # 执行转换
+    # 执行调用
     response = caller.call_with_functions(
         user_input,
         system_message="请使用currency_convert函数将100美元转换为人民币。"
     )
     
-    # 打印详细信息
+    # 输出结果
     print_request_data(caller.last_request)
     print_api_response(caller.raw_response)
     

@@ -51,7 +51,7 @@ def test_singlestep_circle_price():
     )
     
     # 执行调用
-    response = caller.call_with_functions(case.prompt, system_message=case.system_message)
+    response = caller.call_single_function(case.prompt, system_message=case.system_message)
     print_request_data(caller.last_request)
     print_api_response(response.model_dump())
     print_execution_time(caller.execution_time)
@@ -82,7 +82,7 @@ def test_singlestep_circle_price():
             f"2. 货币转换结果：{json.dumps(results['currency_convert'], ensure_ascii=False)}"
         )
         
-        format_response = caller.call_with_functions(result_prompt)
+        format_response = caller.call_single_function(result_prompt)
         if format_response.choices and format_response.choices[0].message.content:
             logger.print_panel("最终结果", format_response.choices[0].message.content, "green")
             logger.print_success("所有计算已完成")

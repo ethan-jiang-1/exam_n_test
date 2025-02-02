@@ -31,7 +31,7 @@ def test_multisteps_mixed_functions():
     
     # 步骤1.1：获取当前时间
     print_test_header("步骤1.1：获取当前时间")
-    response = caller.call_with_functions(
+    response = caller.call_single_function(
         user_input,
         system_message="请使用get_current_time函数获取当前时间。不要使用其他函数。"
     )
@@ -46,7 +46,7 @@ def test_multisteps_mixed_functions():
     
     # 步骤1.2：查询北京天气
     print_test_header("步骤1.2：查询北京天气")
-    response = caller.call_with_functions(
+    response = caller.call_single_function(
         user_input,
         system_message="请使用get_weather函数查询北京的天气。不要使用其他函数。"
     )
@@ -66,7 +66,7 @@ def test_multisteps_mixed_functions():
     
     # 步骤2.1：计算圆面积
     print_test_header("步骤2.1：计算圆面积")
-    response = caller.call_with_functions(
+    response = caller.call_single_function(
         user_input,
         system_message="请使用calculate_circle_area函数计算半径为10的圆的面积。不要使用其他函数。"
     )
@@ -81,7 +81,7 @@ def test_multisteps_mixed_functions():
     
     # 步骤2.2：进行货币转换
     print_test_header("步骤2.2：进行货币转换")
-    response = caller.call_with_functions(
+    response = caller.call_single_function(
         user_input,
         system_message="请使用currency_convert函数将100美元转换为人民币。不要使用其他函数。"
     )

@@ -17,7 +17,7 @@ def test_multisteps_weather():
     user_input = "北京今天天气怎么样？"
     print_user_input(user_input)
     
-    response = caller.call_with_functions(
+    response = caller.call_single_function(
         user_input,
         system_message="请使用get_weather函数查询北京的天气。"
     )
@@ -35,7 +35,7 @@ def test_multisteps_weather():
     user_input = "查询东京(JP)的天气"
     print_user_input(user_input)
     
-    response = caller.call_with_functions(
+    response = caller.call_single_function(
         user_input,
         system_message="请使用get_weather函数查询东京的天气，注意使用正确的国家代码。"
     )

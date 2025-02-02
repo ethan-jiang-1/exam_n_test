@@ -20,7 +20,7 @@ def test_circle_area():
     print_user_input(user_input)
     
     # 执行调用
-    response = caller.call_with_functions(user_input)
+    response = caller.call_single_function(user_input)
     
     # 输出结果
     print_request_data(caller.last_request)

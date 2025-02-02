@@ -26,7 +26,7 @@ def test_singlestep_meeting_restaurant():
     print_user_input(user_input)
     
     # 在一次调用中请求多个函数执行
-    caller.call_with_multiple_functions(
+    caller.call_with_conversation(
         user_input,
         system_message="这是一个多函数调用测试。请在一次调用中完成以下任务：1) 使用get_current_time获取当前时间；2) 使用schedule_reminder设置2小时后的会议提醒；3) 使用search_restaurants查找一家评分4分以上的中餐厅"
     )

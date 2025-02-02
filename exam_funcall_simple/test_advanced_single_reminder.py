@@ -20,7 +20,7 @@ def test_advanced_single_reminder():
     print_user_input(user_input)
     
     # 执行调用
-    response = caller.call_with_functions(
+    response = caller.call_single_function(
         user_input,
         system_message=system_message
     )

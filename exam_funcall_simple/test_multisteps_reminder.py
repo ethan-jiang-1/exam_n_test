@@ -20,7 +20,7 @@ def test_multisteps_reminder():
     user_input = "帮我设置一个明天下午3点的团队会议提醒"
     print_user_input(user_input)
     
-    response = caller.call_with_functions(
+    response = caller.call_single_function(
         user_input,
         system_message=system_message
     )
@@ -41,7 +41,7 @@ def test_multisteps_reminder():
     user_input = "设置一个高优先级的项目评审会议，时间是后天上午10点，参与者有team@example.com"
     print_user_input(user_input)
     
-    response = caller.call_with_functions(
+    response = caller.call_single_function(
         user_input,
         system_message=system_message
     )

@@ -26,7 +26,7 @@ def test_singlestep_mixed():
     print_user_input(user_input)
     
     # 执行调用
-    response = caller.call_with_multiple_functions(
+    response = caller.call_with_conversation(
         user_input,
         system_message=(
             "你需要在一次响应中完成以下所有任务，不要分步执行：\n"

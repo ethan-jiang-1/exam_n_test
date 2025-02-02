@@ -24,7 +24,7 @@ def test_singlestep_time_weather():
     print_user_input(user_input)
     
     # 执行调用
-    caller.call_with_functions(
+    caller.call_single_function(
         user_input,
         system_message="这是一个多函数调用测试。请在一次调用中完成以下任务：1) 使用get_current_time获取当前时间；2) 使用get_weather查询北京的天气；3) 使用get_weather查询东京的天气，注意设置country参数为JP"
     )

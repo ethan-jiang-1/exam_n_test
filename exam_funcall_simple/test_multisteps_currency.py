@@ -17,7 +17,7 @@ def test_multisteps_currency():
     user_input = "把100美元换算成人民币"
     print_user_input(user_input)
     
-    response = caller.call_with_functions(
+    response = caller.call_single_function(
         user_input,
         system_message="请使用currency_convert函数将100美元转换为人民币。"
     )
@@ -35,7 +35,7 @@ def test_multisteps_currency():
     user_input = "将50欧元换成日元"
     print_user_input(user_input)
     
-    response = caller.call_with_functions(
+    response = caller.call_single_function(
         user_input,
         system_message="请使用currency_convert函数将50欧元转换为日元。"
     )

@@ -17,7 +17,7 @@ def test_multisteps_restaurant():
     user_input = "在北京找一家好评分高于4分的中餐馆"
     print_user_input(user_input)
     
-    response = caller.call_with_functions(
+    response = caller.call_single_function(
         user_input,
         system_message="请使用search_restaurants函数搜索餐厅。"
     )
@@ -35,7 +35,7 @@ def test_multisteps_restaurant():
     user_input = "找一家北京的高档意大利餐厅，价格不限"
     print_user_input(user_input)
     
-    response = caller.call_with_functions(
+    response = caller.call_single_function(
         user_input,
         system_message="请使用search_restaurants函数搜索高档意大利餐厅。"
     )

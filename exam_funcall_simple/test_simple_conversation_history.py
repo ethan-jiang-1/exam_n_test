@@ -26,7 +26,7 @@ def test_with_history():
     print_user_input(user_input)
     
     # 执行调用
-    response = caller.call_with_functions(
+    response = caller.call_single_function(
         user_input,
         history=history
     )

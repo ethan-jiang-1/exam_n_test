@@ -4,7 +4,7 @@ from datetime import datetime
 import time
 
 from exam_funcall_simple import config
-from exam_funcall_simple import simple_func
+from exam_funcall_simple import func_simple
 
 class GPTFunctionCaller:
     def __init__(self, debug=True):
@@ -20,8 +20,8 @@ class GPTFunctionCaller:
         )
         
         self.available_functions = {
-            "get_current_time": simple_func.get_current_time,
-            "calculate_circle_area": simple_func.calculate_circle_area
+            "get_current_time": func_simple.get_current_time,
+            "calculate_circle_area": func_simple.calculate_circle_area
         }
         self.debug = debug
         
@@ -35,13 +35,13 @@ class GPTFunctionCaller:
             else:
                 print(json.dumps(content, indent=2, ensure_ascii=False))
                 
-    def _format_function_call(self, function_call: dict) -> str:
+    def _format_function_call(self, function_call) -> str:
         """格式化函数调用信息"""
         if not function_call:
             return "No function call"
         return (
-            f"Function: {function_call.get('name', 'N/A')}\n"
-            f"Arguments: {function_call.get('arguments', 'N/A')}"
+            f"Function: {function_call.name}\n"
+            f"Arguments: {function_call.arguments}"
         )
 
     def call_with_functions(self, user_message: str):
@@ -60,7 +60,7 @@ class GPTFunctionCaller:
         request_data = {
             "model": config.GPT4_DEPLOYMENT_NAME,
             "messages": messages,
-            "functions": simple_func.FUNCTION_DESCRIPTIONS,
+            "functions": func_simple.FUNCTION_DESCRIPTIONS,
             "function_call": "auto"
         }
         self._log_debug("请求数据", request_data)
@@ -79,6 +79,14 @@ class GPTFunctionCaller:
                     "函数调用信息", 
                     self._format_function_call(response.choices[0].message.function_call)
                 )
+                
+                # 执行函数调用
+                func_name = response.choices[0].message.function_call.name
+                func_args = json.loads(response.choices[0].message.function_call.arguments)
+                
+                if func_name in self.available_functions:
+                    function_response = self.available_functions[func_name](**func_args)
+                    self._log_debug("函数执行结果", str(function_response))
             
             # 记录完整耗时
             elapsed_time = time.time() - start_time

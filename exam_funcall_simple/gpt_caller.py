@@ -55,7 +55,8 @@ class GPTFunctionCaller:
         if not logger.handlers:
             handler = colorlog.StreamHandler()
             handler.setFormatter(colorlog.ColoredFormatter(
-                '%(log_color)s%(message)s%(reset)s',
+                '%(log_color)s[%(asctime)s] %(message)s%(reset)s',
+                datefmt='%Y-%m-%d %H:%M:%S',
                 log_colors={
                     'DEBUG': LogType.USER_INPUT.color,
                     'INFO': LogType.REQUEST.color,
@@ -74,7 +75,9 @@ class GPTFunctionCaller:
             return
             
         # 输出带颜色的标题
-        self.logger.log(log_type.level, f"\n=== {log_type.title} ===")
+        self.logger.log(log_type.level, f"\n{'='*50}")
+        self.logger.log(log_type.level, f"=== {log_type.title} ===")
+        self.logger.log(log_type.level, f"{'='*50}\n")
         
         # 输出内容
         if isinstance(content, str):
@@ -84,6 +87,9 @@ class GPTFunctionCaller:
                 log_type.level,
                 json.dumps(content, indent=2, ensure_ascii=False)
             )
+        
+        # 输出分隔符
+        self.logger.log(log_type.level, f"\n{'='*50}\n")
                 
     def _format_function_call(self, function_call) -> str:
         """格式化函数调用信息"""
@@ -112,25 +118,25 @@ class GPTFunctionCaller:
         start_time = time.time()
         self._log_debug(LogType.USER_INPUT, user_message)
         
-        # 准备消息
-        messages = []
-        if system_message:
-            messages.append({"role": "system", "content": system_message})
-        if history:
-            messages.extend(history)
-        messages.append({"role": "user", "content": user_message})
-        
-        # 准备请求
-        request_data = {
-            "model": config.GPT4_DEPLOYMENT_NAME,
-            "messages": messages,
-            "functions": self.functions,
-            "function_call": "auto"
-        }
-        self._log_debug(LogType.REQUEST, request_data)
-        
-        # 发送请求
         try:
+            # 准备消息
+            messages = []
+            if system_message:
+                messages.append({"role": "system", "content": system_message})
+            if history:
+                messages.extend(history)
+            messages.append({"role": "user", "content": user_message})
+            
+            # 准备请求
+            request_data = {
+                "model": config.GPT4_DEPLOYMENT_NAME,
+                "messages": messages,
+                "functions": self.functions,
+                "function_call": "auto"
+            }
+            self._log_debug(LogType.REQUEST, request_data)
+            
+            # 发送请求
             response = self.client.chat.completions.create(**request_data)
             
             # 记录响应
@@ -149,8 +155,16 @@ class GPTFunctionCaller:
                 func_args = json.loads(response.choices[0].message.function_call.arguments)
                 
                 if func_name in self.available_functions:
-                    function_response = self.available_functions[func_name](**func_args)
-                    self._log_debug(LogType.FUNCTION_RESULT, str(function_response))
+                    try:
+                        function_response = self.available_functions[func_name](**func_args)
+                        self._log_debug(LogType.FUNCTION_RESULT, str(function_response))
+                    except Exception as e:
+                        self._log_debug(LogType.ERROR, f"函数执行失败: {str(e)}")
+                        raise
+                else:
+                    error_msg = f"未找到函数: {func_name}"
+                    self._log_debug(LogType.ERROR, error_msg)
+                    raise ValueError(error_msg)
             
             # 记录完整耗时
             elapsed_time = time.time() - start_time
@@ -159,7 +173,7 @@ class GPTFunctionCaller:
             return response
             
         except Exception as e:
-            self._log_debug(LogType.ERROR, str(e))
+            self._log_debug(LogType.ERROR, f"调用失败: {str(e)}")
             raise
 
 if __name__ == "__main__":

@@ -51,8 +51,14 @@ class GPTFunctionCaller(GPTBase):
             # 准备请求
             messages = prepare_messages(user_message, system_message, history)
             request_data = prepare_request_data(messages, self.functions, force_function_call, user_message)
-            self.last_request = request_data
-            logger.request_data(request_data)
+            # 确保 last_request 是可序列化的
+            self.last_request = {
+                "model": request_data["model"],
+                "messages": request_data["messages"],
+                "tools": request_data["tools"],
+                "tool_choice": request_data.get("tool_choice", "auto")
+            }
+            logger.request_data(self.last_request)
             
             # 发送请求
             response = self.client.chat.completions.create(**request_data)
@@ -128,8 +134,14 @@ class GPTFunctionCaller(GPTBase):
                 "tool_choice": "auto"  # 让模型自动选择是否调用函数
             }
             
-            self.last_request = request_data
-            logger.request_data(request_data)
+            # 确保 last_request 是可序列化的
+            self.last_request = {
+                "model": request_data["model"],
+                "messages": request_data["messages"],
+                "tools": request_data["tools"],
+                "tool_choice": request_data.get("tool_choice", "auto")
+            }
+            logger.request_data(self.last_request)
             
             # 发送请求
             response = self.client.chat.completions.create(**request_data)

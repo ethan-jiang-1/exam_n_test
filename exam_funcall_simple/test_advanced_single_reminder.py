@@ -41,15 +41,13 @@ def test_advanced_single_reminder():
     
     # 验证提醒参数
     import json
-    reminder_call = json.loads(tool_calls[0].function.arguments)
-    assert reminder_call["title"] == "团队会议", "提醒标题不正确"
+    reminder_args = json.loads(tool_calls[0].function.arguments)
+    assert reminder_args["datetime_str"] == "+2 hours", "提醒时间参数不正确"
+    assert reminder_args["title"] == "团队会议", "提醒标题不正确"
     
-    # 验证时间设置（2小时后）
-    from datetime import datetime
-    current_time = datetime.now()
-    reminder_time = datetime.strptime(reminder_call["time"], "%Y-%m-%d %H:%M:%S")
-    time_diff = reminder_time - current_time
-    assert abs(time_diff.total_seconds() - 7200) < 60, "提醒时间应该是2小时后（允许1分钟误差）"
+    # 验证函数调用成功
+    response_content = response.choices[0].message.content
+    assert "团队会议" in response_content and "2小时" in response_content, "响应消息不包含必要信息"
 
 if __name__ == "__main__":
     test_advanced_single_reminder() 

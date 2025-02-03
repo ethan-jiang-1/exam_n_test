@@ -64,7 +64,23 @@ class Logger:
         """格式化日志内容"""
         if isinstance(content, (dict, list)):
             import json
-            return json.dumps(content, indent=2, ensure_ascii=False)
+            try:
+                return json.dumps(content, indent=2, ensure_ascii=False)
+            except TypeError:
+                # 如果对象不可序列化，尝试将其转换为可序列化的形式
+                def convert_to_serializable(obj):
+                    if hasattr(obj, 'model_dump'):
+                        return obj.model_dump()
+                    elif hasattr(obj, '__dict__'):
+                        return {k: convert_to_serializable(v) for k, v in obj.__dict__.items()}
+                    elif isinstance(obj, (list, tuple)):
+                        return [convert_to_serializable(x) for x in obj]
+                    elif isinstance(obj, dict):
+                        return {k: convert_to_serializable(v) for k, v in obj.items()}
+                    return str(obj)
+                
+                serializable_content = convert_to_serializable(content)
+                return json.dumps(serializable_content, indent=2, ensure_ascii=False)
         return str(content)
     
     def _log(self, log_type: LogType, content: Any):

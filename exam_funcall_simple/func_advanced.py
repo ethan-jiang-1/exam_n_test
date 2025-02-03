@@ -177,7 +177,7 @@ def currency_convert(amount: float, from_currency: str, to_currency: str) -> Dic
         "timestamp": datetime.now().isoformat()
     }
 
-@log_function
+@log_function_call("schedule_reminder")
 def schedule_reminder(title: str, datetime_str: str, priority: str = "normal", participants: List[str] = None) -> Dict:
     """创建日程提醒"""
     # 解析时间字符串
@@ -214,7 +214,7 @@ def schedule_reminder(title: str, datetime_str: str, priority: str = "normal", p
     
     return reminder
 
-@log_function
+@log_function_call("search_restaurants")
 def search_restaurants(location: str, cuisine_type: str = None, price_range: str = None, min_rating: float = 4.0) -> List[Dict]:
     """搜索餐厅"""
     # 模拟餐厅数据库

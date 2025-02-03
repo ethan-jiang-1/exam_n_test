@@ -33,15 +33,43 @@ def test_singlestep_time_weather():
         # 执行调用
         response = caller.call_with_conversation(
             user_input,
-            system_message=(
-                "你必须在一个响应中完成所有任务。你的响应必须包含一个包含所有三个函数调用的tool_calls数组。\n"
-                "具体来说，你需要：\n"
-                "1. 使用 get_current_time 获取当前时间\n"
-                "2. 使用 get_weather 获取北京的天气\n"
-                "3. 使用 get_weather 获取东京的天气，注意设置country参数为JP\n"
-                "这三个函数调用必须在同一个响应的tool_calls数组中一起返回。不要分多次调用，不要分步执行。\n"
-                "你的响应应该只包含一个带有这三个函数调用的tool_calls数组。"
-            )
+            system_message="""你必须在一个响应中完成所有任务。你的响应必须是一个JSON对象，包含以下格式：
+{
+    "content": null,
+    "tool_calls": [
+        {
+            "type": "function",
+            "function": {
+                "name": "get_current_time",
+                "arguments": "{}"
+            }
+        },
+        {
+            "type": "function", 
+            "function": {
+                "name": "get_weather",
+                "arguments": "{\"city\": \"北京\"}"
+            }
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "get_weather",
+                "arguments": "{\"city\": \"东京\", \"country\": \"JP\"}"
+            }
+        }
+    ]
+}
+
+你需要：
+1. 使用 get_current_time 获取当前时间
+2. 使用 get_weather 获取北京的天气
+3. 使用 get_weather 获取东京的天气，注意设置country参数为JP
+
+这三个函数调用必须在同一个响应的tool_calls数组中一起返回。
+不要尝试使用parallel或其他并行执行方式。
+每个函数调用都必须包含type字段，值为"function"。
+你的响应必须是一个有效的JSON对象。"""
         )
         
         # 输出结果

@@ -25,4 +25,4 @@ def foobar(x: bytes) -> None:
 
 
 result = agent.run_sync('Does their name start with "A"?', deps=User('Anne'))
-foobar(result.data)
+foobar(result.data) 

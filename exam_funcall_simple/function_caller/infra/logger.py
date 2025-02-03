@@ -139,22 +139,26 @@ class Logger:
         """输出错误信息"""
         self._log(LogType.ERROR, message)
     
-    def function_logger(self, func_name: str):
+    def function_logger(self, func_name: str = None):
         """函数调用日志装饰器
         用法:
         @logger.function_logger("函数名")
+        或
+        @logger.function_logger()
         def some_function(*args, **kwargs):
             pass
         """
         def decorator(func):
             @wraps(func)
             def wrapper(*args, **kwargs):
-                self.function_call(func_name, *args, **kwargs)
+                # 如果没有提供函数名，使用函数本身的名字
+                actual_func_name = func_name if func_name is not None else func.__name__
+                self.function_call(actual_func_name, *args, **kwargs)
                 result = func(*args, **kwargs)
                 self.function_result(result)
                 return result
             return wrapper
-        return decorator
+        return decorator if func_name is not None else decorator
 
 # 全局日志器实例
 logger = Logger()

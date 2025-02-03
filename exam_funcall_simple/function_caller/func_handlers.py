@@ -30,8 +30,11 @@ def execute_function(
     try:
         # 获取函数并执行
         func = available_functions[func_name]
-        # 直接传递参数字典
-        function_response = func(func_args)
+        # 解包参数字典
+        if func_args:
+            function_response = func(**func_args)
+        else:
+            function_response = func()
         log.function_result(str(function_response))
         return function_response
     except Exception as e:

@@ -8,7 +8,6 @@ from exam_funcall_simple.test_mc_singlestep_circle_price import test_singlestep_
 from exam_funcall_simple.test_mc_singlestep_meeting_restaurant import test_singlestep_meeting_restaurant
 from exam_funcall_simple.test_mc_singlestep_mixed import test_singlestep_mixed
 from exam_funcall_simple.test_mc_singlestep_time_weather import test_singlestep_time_weather
-from exam_funcall_simple.test_mc_singlestep_mixed1 import test_singlestep_time_weather as test_multicall_singlestep_time_weather
 from exam_funcall_simple.test_multisteps_mixed_functions import test_multisteps_mixed_functions
 
 def run_failed_tests():
@@ -27,7 +26,6 @@ def run_failed_tests():
         ("test_mc_singlestep_meeting_restaurant", test_singlestep_meeting_restaurant, True),
         ("test_mc_singlestep_mixed", test_singlestep_mixed, True),
         ("test_mc_singlestep_time_weather", test_singlestep_time_weather, True),
-        ("test_multicall_singlestep_time_weather", test_multicall_singlestep_time_weather, True),
         ("test_multisteps_mixed_functions", test_multisteps_mixed_functions, True)
     ]
     

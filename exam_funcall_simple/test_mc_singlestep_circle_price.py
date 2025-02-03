@@ -26,10 +26,10 @@ class CirclePrice:
         )
         
         self.system_message = (
-            "你是一个专业的助手，可以帮助用户进行各种计算。"
-            "你可以使用calculate_circle_area计算圆形面积，"
-            "使用currency_convert进行货币转换。"
-            "请根据用户的需求调用合适的函数，并以清晰易懂的方式展示结果。"
+            "你是一位精通数学和金融计算的专业助手。"
+            "用户的问题涉及几何计算和货币转换，"
+            "请思考如何高效地完成这些计算并给出清晰的解释。"
+            "记住，一个专业的回答应该简洁、准确、一步到位。"
         )
 
 def test_singlestep_circle_price():
@@ -53,7 +53,7 @@ def test_singlestep_circle_price():
     )
     
     # 执行调用
-    response = caller.call_with_conversation(
+    response = caller.call_single_function(
         case.prompt,
         system_message=case.system_message
     )

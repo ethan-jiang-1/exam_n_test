@@ -35,7 +35,7 @@ def test_multisteps_mixed_functions():
     
     # 场景1：时间和天气多步骤查询
     print_test_header("场景1：时间和天气多步骤查询")
-    user_input = "现在几点了？顺便帮我查查北京的天气"
+    user_input = "现在几点了？"
     print_user_input(user_input)
     
     # 步骤1.1：获取当前时间
@@ -57,6 +57,8 @@ def test_multisteps_mixed_functions():
     
     # 步骤1.2：查询北京天气
     print_test_header("步骤1.2：查询北京天气")
+    user_input = "查查北京的天气"
+    print_user_input(user_input)
     response = caller.call_with_conversation(
         user_input,
         system_message="请使用get_weather函数查询北京的天气。不要使用其他函数。"
@@ -79,7 +81,7 @@ def test_multisteps_mixed_functions():
     
     # 场景2：圆面积和货币转换多步骤查询
     print_test_header("场景2：圆面积和货币转换多步骤查询")
-    user_input = "一个半径为10厘米的圆形桌子价值100美元，请告诉我它的面积和人民币价格"
+    user_input = "计算一个半径为10厘米的圆形桌子的面积"
     print_user_input(user_input)
     
     # 步骤2.1：计算圆面积
@@ -105,6 +107,8 @@ def test_multisteps_mixed_functions():
     
     # 步骤2.2：进行货币转换
     print_test_header("步骤2.2：进行货币转换")
+    user_input = "这个桌子价值100美元，请换算成人民币"
+    print_user_input(user_input)
     response = caller.call_with_conversation(
         user_input,
         system_message="请使用currency_convert函数将100美元转换为人民币。不要使用其他函数。"

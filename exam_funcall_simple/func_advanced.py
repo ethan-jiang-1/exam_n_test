@@ -130,7 +130,7 @@ def log_function(func):
         return result
     return wrapper
 
-@log_function
+@log_function_call("get_weather")
 def get_weather(city: str, country: str = "CN") -> WeatherInfo:
     """获取指定城市的天气信息"""
     # 这里模拟天气API调用

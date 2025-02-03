@@ -25,10 +25,8 @@ from pydantic_ai import Agent, ModelRetry, RunContext
 # 'if-token-present' means nothing will be sent (and the example will work) if you don't have logfire configured
 logfire.configure(send_to_logfire='if-token-present')
 
-import sys 
-
-if "./" not in sys.path:
-    sys.path.append("./")
+from dotenv import load_dotenv
+load_dotenv()
 
 from exam_pydantic_ai.openai_model import get_model
 

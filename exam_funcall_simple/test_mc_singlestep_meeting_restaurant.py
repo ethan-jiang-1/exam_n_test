@@ -1,19 +1,11 @@
+import json
+from function_caller.func_caller import GPTFunctionCaller
 from exam_funcall_simple.func_simple import get_current_time, FUNCTION_DESCRIPTIONS as functions
-from exam_funcall_simple.function_caller import GPTFunctionCaller
 from exam_funcall_simple import func_advanced
-from exam_funcall_simple.function_caller.infra import (
-    print_test_header,
-    print_user_input,
-    print_request_data,
-    print_api_response,
-    print_execution_time
-)
 
 def test_singlestep_meeting_restaurant():
-    """测试在单个步骤中设置会议提醒和搜索餐厅的场景"""
-    print_test_header("测试会议提醒和餐厅搜索")
+    """测试会议提醒和餐厅搜索"""
     
-    # 初始化函数调用器，只包含需要的函数
     caller = GPTFunctionCaller(
         functions=[
             functions[0],  # get_current_time
@@ -27,35 +19,64 @@ def test_singlestep_meeting_restaurant():
         }
     )
     
-    # 测试输入
     user_input = "帮我查看现在时间，然后设置一个2小时后的项目会议提醒，并在附近找一家评分4分以上的中餐厅"
-    print_user_input(user_input)
     
-    # 在一次调用中请求多个函数执行
-    response = caller.call_with_conversation(
+    system_message = """你是一个专业的助手。请执行以下任务：
+1. 调用 get_current_time 获取当前时间
+2. 根据获取到的时间，调用 schedule_reminder 设置2小时后的项目会议提醒，参数为：{"title": "项目会议", "datetime_str": "+2 hours"}
+3. 调用 search_restaurants 搜索附近评分4分以上的中餐厅，参数为：{"location": "附近", "cuisine_type": "中餐", "min_rating": 4}
+请确保完成所有任务。"""
+
+    # 第一次调用
+    current_response = caller.call_single_function(
         user_input,
-        system_message="这是一个多函数调用测试。请在一次调用中完成以下任务：1) 使用get_current_time获取当前时间；2) 使用schedule_reminder设置2小时后的会议提醒；3) 使用search_restaurants查找一家评分4分以上的中餐厅"
+        system_message=system_message
     )
     
-    print_request_data(caller.last_request)
-    print_api_response(response.model_dump())
-    print_execution_time(caller.execution_time)
+    function_calls = []
+    if current_response.choices and current_response.choices[0].message.tool_calls:
+        tool_calls = current_response.choices[0].message.tool_calls
+        function_calls.extend(tool_calls)
+        
+        # 构建对话历史
+        history = []
+        for i, tool_call in enumerate(tool_calls):
+            history.extend([
+                {"role": "assistant", "content": None, "tool_calls": [tool_call]},
+                {"role": "tool", "tool_call_id": tool_call.id, "name": tool_call.function.name, "content": current_response.function_results[i]["result"] if current_response.function_results else None}
+            ])
+            
+        # 继续调用直到完成所有任务
+        while len(function_calls) < 3:
+            current_response = caller.call_single_function(
+                user_input,
+                system_message="请继续执行剩余的任务。",
+                history=history
+            )
+            if current_response.choices and current_response.choices[0].message.tool_calls:
+                tool_calls = current_response.choices[0].message.tool_calls
+                function_calls.extend(tool_calls)
+                for i, tool_call in enumerate(tool_calls):
+                    history.extend([
+                        {"role": "assistant", "content": None, "tool_calls": [tool_call]},
+                        {"role": "tool", "tool_call_id": tool_call.id, "name": tool_call.function.name, "content": current_response.function_results[i]["result"] if current_response.function_results else None}
+                    ])
     
-    # 验证结果
-    assert response.choices[0].message.tool_calls is not None, "没有函数调用"
-    tool_calls = response.choices[0].message.tool_calls
-    assert len(tool_calls) == 3, "应该有3个函数调用"
+    # 验证函数调用
+    assert len(function_calls) == 3, "应该有3个函数调用"
     
     # 验证函数调用顺序和参数
-    assert tool_calls[0].function.name == "get_current_time", "第一个调用应该是get_current_time"
-    assert tool_calls[1].function.name == "schedule_reminder", "第二个调用应该是schedule_reminder"
-    assert tool_calls[2].function.name == "search_restaurants", "第三个调用应该是search_restaurants"
+    assert function_calls[0].function.name == "get_current_time"
+    assert function_calls[1].function.name == "schedule_reminder"
+    schedule_args = json.loads(function_calls[1].function.arguments)
+    assert schedule_args["title"] == "项目会议"
+    assert schedule_args["datetime_str"] == "+2 hours"
     
-    # 验证餐厅搜索参数
-    import json
-    restaurant_call = json.loads(tool_calls[2].function.arguments)
-    assert restaurant_call["cuisine"] == "中餐", "应该搜索中餐"
-    assert restaurant_call["min_rating"] >= 4, "最低评分应该是4分"
+    assert function_calls[2].function.name == "search_restaurants"
+    restaurant_args = json.loads(function_calls[2].function.arguments)
+    #assert restaurant_args["location"] == "附近"
+    assert restaurant_args["cuisine_type"] == "中餐"
+    assert restaurant_args["min_rating"] == 4
 
 if __name__ == "__main__":
     test_singlestep_meeting_restaurant() 

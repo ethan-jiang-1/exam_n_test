@@ -32,6 +32,13 @@ def test_advanced_single_reminder():
     if response.choices and response.choices[0].message and response.choices[0].message.function_call:
         print_function_result(response.choices[0].message.function_call)
     
+    # 输出函数执行结果
+    if hasattr(response, 'function_results'):
+        for result in response.function_results:
+            print("\n函数执行结果:")
+            print(f"函数名称: {result['name']}")
+            print(f"执行结果: {result['result']}")
+    
     print_execution_time(caller.execution_time)
 
 if __name__ == "__main__":

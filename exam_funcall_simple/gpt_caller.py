@@ -236,6 +236,7 @@ class GPTFunctionCaller(GPTBase):
             # 提取并记录函数调用信息
             if response.choices and response.choices[0].message:
                 message = response.choices[0].message
+                function_results = []  # 存储所有函数调用的结果
                 
                 # 处理tool_calls（新的多函数调用方式）
                 if message.tool_calls:
@@ -254,6 +255,10 @@ class GPTFunctionCaller(GPTBase):
                                 try:
                                     function_response = self.available_functions[func_name](**func_args)
                                     self._log_debug(LogType.FUNCTION_RESULT, str(function_response))
+                                    function_results.append({
+                                        'name': func_name,
+                                        'result': function_response
+                                    })
                                 except Exception as e:
                                     self._log_debug(LogType.ERROR, f"函数执行失败: {str(e)}")
                                     raise
@@ -277,6 +282,10 @@ class GPTFunctionCaller(GPTBase):
                         try:
                             function_response = self.available_functions[func_name](**func_args)
                             self._log_debug(LogType.FUNCTION_RESULT, str(function_response))
+                            function_results.append({
+                                'name': func_name,
+                                'result': function_response
+                            })
                         except Exception as e:
                             self._log_debug(LogType.ERROR, f"函数执行失败: {str(e)}")
                             raise
@@ -284,6 +293,9 @@ class GPTFunctionCaller(GPTBase):
                         error_msg = f"未找到函数: {func_name}"
                         self._log_debug(LogType.ERROR, error_msg)
                         raise ValueError(error_msg)
+                
+                # 将函数执行结果添加到response中
+                response.function_results = function_results
             
             # 记录完整耗时
             elapsed_time = time.time() - start_time

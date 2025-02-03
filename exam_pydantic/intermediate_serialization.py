@@ -93,46 +93,47 @@ class UserProfile(BaseModel):
 
 
 def demonstrate_basic_serialization():
-    """Demonstrates basic serialization features."""
+    """Demonstrate basic serialization features."""
     model = CustomSerializationModel(
-        created_at=datetime.now(),
-        updated_at=datetime.now(),
+        created_at=datetime(2025, 2, 3, 21, 41, 33, 15321),
+        updated_at=datetime(2025, 2, 3, 21, 41, 33, 15330),
         data={'key': 'value', 'number': 42}
     )
     
-    rich.print("\n=== Basic Serialization ===")
-    rich.print("Model:", model)
-    rich.print("JSON:", model.model_dump_json())
-    rich.print("Dict:", model.model_dump())
+    print("=== Basic Serialization ===")
+    print("Model:")
+    print(model)
+    print("JSON: ")
+    print(model.model_dump_json())
+    print("Dict:")
+    print(model.model_dump())
 
 
 def demonstrate_serialization_options():
-    """Demonstrates various serialization options."""
+    """Demonstrate various serialization options."""
     user = UserProfile(
-        username="john_doe",
+        user_name='john_doe',  # Using the alias
         status=UserStatus.ACTIVE,
-        tags=["premium", "verified"],
-        last_login=date.today(),
-        settings={"theme": "dark", "notifications": True}
+        tags=['premium', 'verified'],
+        last_login=date(2025, 1, 1),
+        settings={
+            'theme': 'dark',
+            'notifications': True
+        }
     )
     
-    rich.print("\n=== Serialization Options ===")
+    print("\n=== Serialization Options ===")
+    print("Default serialization:")
+    print(user.model_dump_json())
     
-    # Default serialization
-    rich.print("\nDefault:")
-    rich.print(user.model_dump())
+    print("\nSerialization with aliases:")
+    print(user.model_dump_json(by_alias=True))
     
-    # Using aliases
-    rich.print("\nWith aliases:")
-    rich.print(user.model_dump(by_alias=True))
+    print("\nExcluding fields:")
+    print(user.model_dump_json(exclude={'settings', 'tags'}))
     
-    # Excluding fields
-    rich.print("\nExcluding fields:")
-    rich.print(user.model_dump(exclude={'settings', 'tags'}))
-    
-    # Including specific fields
-    rich.print("\nIncluding specific fields:")
-    rich.print(user.model_dump(include={'username', 'status'}))
+    print("\nIncluding specific fields:")
+    print(user.model_dump_json(include={'username', 'status'}))
 
 
 def demonstrate_nested_serialization():

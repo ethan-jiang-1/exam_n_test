@@ -2,17 +2,18 @@ import os
 from typing import Dict, List, Any, Optional, Tuple
 from dotenv import load_dotenv
 from openai import AzureOpenAI
-from .logger import logger
 
 # 加载环境变量
 load_dotenv()
+
+GPT_MODEL_NAME = "gpt-4o"
 
 class AzureConfig:
     """Azure OpenAI配置"""
     ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT")
     API_KEY = os.getenv("AZURE_OPENAI_API_KEY")
     API_VERSION = os.getenv("AZURE_OPENAI_VERSION", "2024-02-15-preview")
-    MODEL_NAME = "gpt-4o"
+
 
     @classmethod
     def test_connection(cls) -> Tuple[bool, str]:
@@ -24,7 +25,7 @@ class AzureConfig:
                 azure_endpoint=cls.ENDPOINT
             )
             response = client.chat.completions.create(
-                model=cls.MODEL_NAME,
+                model=GPT_MODEL_NAME,
                 messages=[{"role": "user", "content": "Say 'Hello, World!'"}],
                 max_tokens=30
             )
@@ -56,6 +57,8 @@ class GPTBase:
         raise NotImplementedError("Subclasses must implement call method")
 
 if __name__ == "__main__":
+    from exam_funcall_simple.function_caller.infra.logger import logger
+
     # 测试Azure连接
     logger.test_header("Testing Azure OpenAI Connection")
     success, result = AzureConfig.test_connection()

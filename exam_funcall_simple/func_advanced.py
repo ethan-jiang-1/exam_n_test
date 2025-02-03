@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from typing import List, Dict
 from dataclasses import dataclass, asdict
-from exam_funcall_simple.function_caller.infra import log_function_call
+from exam_funcall_simple.function_caller.infra import logger
 
 # 高级函数描述
 ADVANCED_FUNCTION_DESCRIPTIONS = [
@@ -121,7 +121,16 @@ class WeatherInfo:
         """转换为字典以便JSON序列化"""
         return asdict(self)
 
-@log_function_call
+def log_function(func):
+    """函数调用日志装饰器"""
+    def wrapper(args_dict):
+        logger.function_call(func.__name__, args_dict)
+        result = func(**args_dict)
+        logger.function_result(result)
+        return result
+    return wrapper
+
+@log_function
 def get_weather(city: str, country: str = "CN") -> WeatherInfo:
     """获取指定城市的天气信息"""
     # 这里模拟天气API调用
@@ -140,7 +149,7 @@ def get_weather(city: str, country: str = "CN") -> WeatherInfo:
         timestamp=datetime.now().isoformat()
     )
 
-@log_function_call
+@log_function
 def currency_convert(amount: float, from_currency: str, to_currency: str) -> Dict:
     """货币转换功能"""
     # 模拟汇率API调用
@@ -168,7 +177,7 @@ def currency_convert(amount: float, from_currency: str, to_currency: str) -> Dic
         "timestamp": datetime.now().isoformat()
     }
 
-@log_function_call
+@log_function
 def schedule_reminder(title: str, datetime_str: str, priority: str = "normal", participants: List[str] = None) -> Dict:
     """创建日程提醒"""
     # 解析时间字符串
@@ -205,7 +214,7 @@ def schedule_reminder(title: str, datetime_str: str, priority: str = "normal", p
     
     return reminder
 
-@log_function_call
+@log_function
 def search_restaurants(location: str, cuisine_type: str = None, price_range: str = None, min_rating: float = 4.0) -> List[Dict]:
     """搜索餐厅"""
     # 模拟餐厅数据库

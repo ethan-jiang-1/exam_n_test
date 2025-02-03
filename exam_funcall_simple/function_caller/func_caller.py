@@ -2,9 +2,8 @@ import time
 import json
 from typing import Dict, List, Any, Optional
 
-from exam_funcall_simple.function_caller.infra.config import GPT4_DEPLOYMENT_NAME
-from exam_funcall_simple.function_caller.infra import GPTBase, LogType
-from exam_funcall_simple.function_caller.func_utils import prepare_messages, prepare_request_data, format_function_call
+from exam_funcall_simple.function_caller.infra import GPTBase, logger, GPT_MODEL_NAME
+from exam_funcall_simple.function_caller.func_utils import prepare_messages, prepare_request_data
 from exam_funcall_simple.function_caller.func_handlers import execute_function, handle_conversation_tool_call
 
 class GPTFunctionCaller(GPTBase):
@@ -22,7 +21,7 @@ class GPTFunctionCaller(GPTBase):
             function_map: 函数名到实际函数的映射
             debug: 是否启用调试模式
         """
-        super().__init__(debug)
+        super().__init__()
         self.functions = functions
         self.available_functions = function_map
 
@@ -46,20 +45,20 @@ class GPTFunctionCaller(GPTBase):
             response: GPT的响应
         """
         start_time = time.time()
-        self._log_debug(LogType.USER_INPUT, user_message)
+        logger.user_input(user_message)
         
         try:
             # 准备请求
             messages = prepare_messages(user_message, system_message, history)
             request_data = prepare_request_data(messages, self.functions, force_function_call, user_message)
             self.last_request = request_data
-            self._log_debug(LogType.REQUEST, request_data)
+            logger.request_data(request_data)
             
             # 发送请求
             response = self.client.chat.completions.create(**request_data)
             response_data = response.model_dump()
             self.raw_response = response_data
-            self._log_debug(LogType.RESPONSE, response_data)
+            logger.api_response(response_data)
             
             # 处理函数调用
             if response.choices and response.choices[0].message:
@@ -70,9 +69,9 @@ class GPTFunctionCaller(GPTBase):
                 if message.tool_calls:
                     for tool_call in message.tool_calls:
                         if tool_call.type == "function":
-                            self._log_debug(
-                                LogType.FUNCTION_CALL,
-                                format_function_call(tool_call.function)
+                            logger.function_call(
+                                tool_call.function.name,
+                                tool_call.function.arguments
                             )
                             
                             func_name = tool_call.function.name
@@ -81,7 +80,7 @@ class GPTFunctionCaller(GPTBase):
                                 func_name,
                                 func_args,
                                 self.available_functions,
-                                self.logger
+                                logger
                             )
                             
                             function_results.append({
@@ -93,12 +92,12 @@ class GPTFunctionCaller(GPTBase):
             
             # 记录耗时
             self.execution_time = time.time() - start_time
-            self._log_debug(LogType.TIMING, f"{self.execution_time:.2f} 秒")
+            logger.execution_time(self.execution_time)
             
             return response
             
         except Exception as e:
-            self._log_debug(LogType.ERROR, str(e))
+            logger.error(str(e))
             raise
 
     def call_with_conversation(
@@ -119,7 +118,7 @@ class GPTFunctionCaller(GPTBase):
             response: GPT的响应，包含所有函数调用结果的总结
         """
         start_time = time.time()
-        self._log_debug(LogType.USER_INPUT, user_message)
+        logger.user_input(user_message)
         
         try:
             # 准备请求
@@ -130,13 +129,13 @@ class GPTFunctionCaller(GPTBase):
             }
             
             self.last_request = request_data
-            self._log_debug(LogType.REQUEST, request_data)
+            logger.request_data(request_data)
             
             # 发送请求
             response = self.client.chat.completions.create(**request_data)
             response_data = response.model_dump()
             self.raw_response = response_data
-            self._log_debug(LogType.RESPONSE, response_data)
+            logger.api_response(response_data)
             
             # 处理函数调用
             if response.choices and response.choices[0].message:
@@ -149,12 +148,12 @@ class GPTFunctionCaller(GPTBase):
                             tool_call,
                             messages,
                             self.available_functions,
-                            self.logger
+                            logger
                         )
                     
                     # 生成新的响应
                     response = self.client.chat.completions.create(
-                        model=GPT4_DEPLOYMENT_NAME,
+                        model=GPT_MODEL_NAME,
                         messages=messages,
                         tools=[{"type": "function", "function": f} for f in self.functions],
                         tool_choice="auto"
@@ -174,7 +173,7 @@ class GPTFunctionCaller(GPTBase):
             
             # 记录耗时
             self.execution_time = time.time() - start_time
-            self._log_debug(LogType.TIMING, f"{self.execution_time:.2f} 秒")
+            logger.execution_time(self.execution_time)
             
             # 返回最后一个响应，但保持tool_calls字段
             if response.choices and response.choices[0].message:
@@ -189,5 +188,5 @@ class GPTFunctionCaller(GPTBase):
             return response
             
         except Exception as e:
-            self._log_debug(LogType.ERROR, str(e))
+            logger.error(str(e))
             raise 

@@ -1,7 +1,13 @@
 from dataclasses import dataclass
 
 from pydantic_ai import Agent, RunContext
+from dotenv import load_dotenv
 
+load_dotenv()
+
+from exam_pai_complex.async_model import get_gpt_model
+
+model_gpt = get_gpt_model()
 
 @dataclass
 class User:
@@ -9,7 +15,7 @@ class User:
 
 
 agent = Agent(
-    'test',
+    model_gpt,
     deps_type=User,  
     result_type=bool,
 )
@@ -24,5 +30,6 @@ def foobar(x: bytes) -> None:
     pass
 
 
-result = agent.run_sync('Does their name start with "A"?', deps=User('Anne'))
-foobar(result.data) 
+if __name__ == "__main__":
+    result = agent.run_sync('Does their name start with "A"?', deps=User('Anne'))
+    foobar(result.data) 

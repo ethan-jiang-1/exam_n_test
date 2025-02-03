@@ -1,6 +1,6 @@
 import json
 from typing import Dict, List, Any
-from exam_funcall_simple.function_caller.infra import logger
+from exam_funcall.function_caller.infra import logger
 
 def execute_function(
         func_name: str,

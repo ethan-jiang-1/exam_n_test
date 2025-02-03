@@ -1,6 +1,6 @@
-from exam_funcall_simple.function_caller.func_caller import GPTFunctionCaller
-from exam_funcall_simple.func_advanced import ADVANCED_FUNCTION_DESCRIPTIONS, schedule_reminder
-from exam_funcall_simple.function_caller.infra import (
+from exam_funcall.function_caller.func_caller import GPTFunctionCaller
+from exam_funcall.func_advanced import ADVANCED_FUNCTION_DESCRIPTIONS, schedule_reminder
+from exam_funcall.function_caller.infra import (
     print_test_header,
     print_user_input,
     print_request_data,

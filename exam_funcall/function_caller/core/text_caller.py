@@ -1,8 +1,8 @@
 import time
 from typing import Dict, List, Any, Optional
 
-from exam_funcall_simple.function_caller.infra.config import GPT4_DEPLOYMENT_NAME
-from exam_funcall_simple.function_caller.infra import GPTBase, LogType
+from exam_funcall.function_caller.infra.config import GPT4_DEPLOYMENT_NAME
+from exam_funcall.function_caller.infra import GPTBase, LogType
 
 class GPTCaller(GPTBase):
     """普通GPT调用器，用于文本对话"""

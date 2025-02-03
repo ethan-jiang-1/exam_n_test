@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from typing import List, Dict
 from dataclasses import dataclass, asdict
-from exam_funcall_simple.function_caller.infra import logger, log_function_call
+from exam_funcall.function_caller.infra import logger, log_function_call
 
 # 高级函数描述
 ADVANCED_FUNCTION_DESCRIPTIONS = [

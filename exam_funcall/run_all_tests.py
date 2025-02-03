@@ -2,7 +2,7 @@
 import os
 import importlib
 import traceback
-from exam_funcall_simple.function_caller.infra import print_test_header
+from exam_funcall.function_caller.infra import print_test_header
 
 def run_all_tests():
     """运行所有测试文件"""
@@ -20,7 +20,7 @@ def run_all_tests():
     for test_file in sorted(test_files):
         try:
             print(f"\n运行测试: {test_file}")
-            module = importlib.import_module(f"exam_funcall_simple.{test_file}")
+            module = importlib.import_module(f"exam_funcall.{test_file}")
             
             # 查找并运行测试函数
             test_funcs = [

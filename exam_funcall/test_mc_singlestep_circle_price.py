@@ -1,7 +1,7 @@
-from exam_funcall_simple.func_simple import calculate_circle_area, FUNCTION_DESCRIPTIONS as functions
-from exam_funcall_simple.function_caller import GPTFunctionCaller
-from exam_funcall_simple import func_advanced
-from exam_funcall_simple.function_caller.infra import (
+from exam_funcall.func_simple import calculate_circle_area, FUNCTION_DESCRIPTIONS as functions
+from exam_funcall.function_caller import GPTFunctionCaller
+from exam_funcall import func_advanced
+from exam_funcall.function_caller.infra import (
     print_test_header,
     print_user_input,
     print_request_data,

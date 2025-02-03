@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional
 
-from exam_funcall_simple.function_caller.infra import GPT_MODEL_NAME
+from exam_funcall.function_caller.infra import GPT_MODEL_NAME
 
 def prepare_messages(
         user_message: str,

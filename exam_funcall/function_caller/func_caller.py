@@ -2,9 +2,9 @@ import time
 import json
 from typing import Dict, List, Any, Optional
 
-from exam_funcall_simple.function_caller.infra import GPTBase, logger, GPT_MODEL_NAME
-from exam_funcall_simple.function_caller.func_utils import prepare_messages, prepare_request_data
-from exam_funcall_simple.function_caller.func_handlers import execute_function, handle_conversation_tool_call
+from exam_funcall.function_caller.infra import GPTBase, logger, GPT_MODEL_NAME
+from exam_funcall.function_caller.func_utils import prepare_messages, prepare_request_data
+from exam_funcall.function_caller.func_handlers import execute_function, handle_conversation_tool_call
 
 class GPTFunctionCaller(GPTBase):
     """支持函数调用的GPT调用器"""

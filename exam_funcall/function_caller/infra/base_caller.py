@@ -57,7 +57,7 @@ class GPTBase:
         raise NotImplementedError("Subclasses must implement call method")
 
 if __name__ == "__main__":
-    from exam_funcall_simple.function_caller.infra.logger import logger
+    from exam_funcall.function_caller.infra.logger import logger
 
     # 测试Azure连接
     logger.test_header("Testing Azure OpenAI Connection")

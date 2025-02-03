@@ -1,7 +1,7 @@
 import json
 from function_caller.func_caller import GPTFunctionCaller
-from exam_funcall_simple.func_simple import get_current_time, FUNCTION_DESCRIPTIONS as functions
-from exam_funcall_simple import func_advanced
+from exam_funcall.func_simple import get_current_time, FUNCTION_DESCRIPTIONS as functions
+from exam_funcall import func_advanced
 
 def test_singlestep_meeting_restaurant():
     """测试会议提醒和餐厅搜索"""

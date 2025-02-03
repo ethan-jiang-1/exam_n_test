@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional
 
-from exam_funcall_simple import config
+from exam_funcall_simple.function_caller.infra.config import GPT4_DEPLOYMENT_NAME
 
 def prepare_messages(
         user_message: str,
@@ -39,7 +39,7 @@ def prepare_request_data(
         request_data: 准备好的请求数据
     """
     request_data = {
-        "model": config.GPT4_DEPLOYMENT_NAME,
+        "model": GPT4_DEPLOYMENT_NAME,
         "messages": messages,
     }
     

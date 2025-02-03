@@ -1,7 +1,7 @@
 import json
 from typing import Dict, List, Any
 
-from exam_funcall_simple.infra_logger import LogType, log_debug
+from exam_funcall_simple.function_caller.infra import LogType, log_debug
 from exam_funcall_simple.function_caller.func_utils import format_function_call
 
 def execute_function(

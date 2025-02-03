@@ -1,12 +1,18 @@
-from exam_funcall_simple.gpt_caller import GPTFunctionCaller
-from exam_funcall_simple import func_simple
+from exam_funcall_simple.func_simple import calculate_circle_area, FUNCTION_DESCRIPTIONS as functions
+from exam_funcall_simple.function_caller import GPTFunctionCaller
 from exam_funcall_simple import func_advanced
-from exam_funcall_simple.base_logger import print_test_header, print_user_input, print_request_data, print_api_response, print_execution_time, TestLogger
+from exam_funcall_simple.function_caller.infra import (
+    print_test_header,
+    print_user_input,
+    print_request_data,
+    print_api_response,
+    print_execution_time,
+    TestLogger
+)
 import json
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Dict
-import math
 
 @dataclass
 class CirclePrice:
@@ -41,11 +47,11 @@ def test_singlestep_circle_price():
     # 设置函数调用
     caller = GPTFunctionCaller(
         functions=[
-            func_simple.FUNCTION_DESCRIPTIONS[1],  # calculate_circle_area
+            functions[1],  # calculate_circle_area
             func_advanced.ADVANCED_FUNCTION_DESCRIPTIONS[1]  # currency_convert
         ],
         function_map={
-            "calculate_circle_area": func_simple.calculate_circle_area,
+            "calculate_circle_area": calculate_circle_area,
             "currency_convert": func_advanced.currency_convert
         }
     )
@@ -64,15 +70,15 @@ def test_singlestep_circle_price():
         
     # 执行函数调用并收集结果
     results = {}
-    function_map = {
-        "calculate_circle_area": func_simple.calculate_circle_area,
-        "currency_convert": func_advanced.currency_convert
-    }
-    
     for tool_call in response.choices[0].message.tool_calls:
-        results[tool_call.function.name] = function_map[tool_call.function.name](
-            **json.loads(tool_call.function.arguments)
-        )
+        if tool_call.function.name == "calculate_circle_area":
+            results[tool_call.function.name] = calculate_circle_area(
+                **json.loads(tool_call.function.arguments)
+            )
+        elif tool_call.function.name == "currency_convert":
+            results[tool_call.function.name] = func_advanced.currency_convert(
+                **json.loads(tool_call.function.arguments)
+            )
     
     # 让模型生成最终结果展示
     if len(results) == 2:  # 两个函数都调用成功
@@ -90,10 +96,6 @@ def test_singlestep_circle_price():
             logger.print_error("结果格式化失败")
     else:
         logger.print_error("无法获取完整的计算结果")
-
-def calculate_circle_area(radius: float) -> float:
-    """计算圆形面积"""
-    return math.pi * radius ** 2
 
 def currency_convert(amount: float, from_currency: str, to_currency: str) -> Dict[str, Any]:
     """模拟货币转换功能"""

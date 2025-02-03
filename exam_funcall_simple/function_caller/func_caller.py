@@ -2,9 +2,8 @@ import time
 import json
 from typing import Dict, List, Any, Optional
 
-from exam_funcall_simple import config
-from exam_funcall_simple.core_base_caller import GPTBase
-from exam_funcall_simple.infra_logger import LogType
+from exam_funcall_simple.function_caller.infra.config import GPT4_DEPLOYMENT_NAME
+from exam_funcall_simple.function_caller.infra import GPTBase, LogType
 from exam_funcall_simple.function_caller.func_utils import prepare_messages, prepare_request_data, format_function_call
 from exam_funcall_simple.function_caller.func_handlers import execute_function, handle_conversation_tool_call
 
@@ -155,7 +154,7 @@ class GPTFunctionCaller(GPTBase):
                     
                     # 如果有函数调用结果，再次调用模型生成最终响应
                     final_response = self.client.chat.completions.create(
-                        model=config.GPT4_DEPLOYMENT_NAME,
+                        model=GPT4_DEPLOYMENT_NAME,
                         messages=messages
                     )
                     response = final_response

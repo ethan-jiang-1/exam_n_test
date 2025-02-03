@@ -1,7 +1,13 @@
-from exam_funcall_simple.gpt_caller import GPTFunctionCaller
-from exam_funcall_simple import func_simple
+from exam_funcall_simple.func_simple import get_current_time, FUNCTION_DESCRIPTIONS as functions
+from exam_funcall_simple.function_caller import GPTFunctionCaller
 from exam_funcall_simple import func_advanced
-from exam_funcall_simple.base_logger import print_test_header, print_user_input, print_request_data, print_api_response, print_execution_time
+from exam_funcall_simple.function_caller.infra import (
+    print_test_header,
+    print_user_input,
+    print_request_data,
+    print_api_response,
+    print_execution_time
+)
 
 def test_singlestep_meeting_restaurant():
     """测试在单个步骤中设置会议提醒和搜索餐厅的场景"""
@@ -10,12 +16,12 @@ def test_singlestep_meeting_restaurant():
     # 初始化函数调用器，只包含需要的函数
     caller = GPTFunctionCaller(
         functions=[
-            func_simple.FUNCTION_DESCRIPTIONS[0],  # get_current_time
+            functions[0],  # get_current_time
             func_advanced.ADVANCED_FUNCTION_DESCRIPTIONS[2],  # schedule_reminder
             func_advanced.ADVANCED_FUNCTION_DESCRIPTIONS[3]  # search_restaurants
         ],
         function_map={
-            "get_current_time": func_simple.get_current_time,
+            "get_current_time": get_current_time,
             "schedule_reminder": func_advanced.schedule_reminder,
             "search_restaurants": func_advanced.search_restaurants
         }

@@ -1,181 +1,9 @@
 from datetime import datetime, timedelta
-from typing import List, Dict, Optional
-from dataclasses import dataclass
-from exam_funcall_simple.base_logger import log_function_call
+from typing import List, Dict
+from dataclasses import dataclass, asdict
+from exam_funcall_simple.function_caller.infra import log_function_call
 
-@dataclass
-class WeatherInfo:
-    temperature: float
-    humidity: float
-    description: str
-    location: str
-    timestamp: str
-
-@log_function_call
-def get_weather(city: str, country: str = "CN") -> WeatherInfo:
-    """获取指定城市的天气信息"""
-    # 这里模拟天气API调用
-    weather_data = {
-        "temp": 23.5,
-        "humidity": 65,
-        "desc": "晴朗",
-        "city": city,
-        "country": country,
-    }
-    return WeatherInfo(
-        temperature=weather_data["temp"],
-        humidity=weather_data["humidity"],
-        description=weather_data["desc"],
-        location=f"{city}, {country}",
-        timestamp=datetime.now().isoformat()
-    )
-
-@log_function_call
-def currency_convert(amount: float, from_currency: str, to_currency: str) -> Dict:
-    """货币转换功能"""
-    # 模拟汇率API调用
-    # 基准汇率（以CNY为基准）
-    base_rates = {
-        "USD": 0.155,  # 1 CNY = 0.155 USD
-        "EUR": 0.127,  # 1 CNY = 0.127 EUR
-        "JPY": 16.95,  # 1 CNY = 16.95 JPY
-        "CNY": 1.0     # 1 CNY = 1.0 CNY
-    }
-    
-    if from_currency not in base_rates or to_currency not in base_rates:
-        raise ValueError(f"Unsupported currency: {from_currency} or {to_currency}")
-    
-    # 先转换为CNY，再转换为目标货币
-    amount_in_cny = amount / base_rates[from_currency]
-    converted = amount_in_cny * base_rates[to_currency]
-    
-    return {
-        "original_amount": amount,
-        "converted_amount": round(converted, 2),
-        "from_currency": from_currency,
-        "to_currency": to_currency,
-        "rate": round(base_rates[to_currency] / base_rates[from_currency], 4),
-        "timestamp": datetime.now().isoformat()
-    }
-
-@log_function_call
-def schedule_reminder(
-    title: str,
-    datetime_str: str,
-    priority: str = "normal",
-    participants: Optional[List[str]] = None
-) -> str:
-    """
-    创建日程提醒
-    Args:
-        title: 提醒事项标题
-        datetime_str: 提醒时间，支持以下格式：
-            - ISO格式: YYYY-MM-DDTHH:MM:SS
-            - 相对时间: +N hours, +N minutes, +N days
-        priority: 优先级 (low/normal/high)
-        participants: 参与者邮箱列表
-    Returns:
-        str: 提醒创建成功的消息
-    """
-    try:
-        # 尝试解析相对时间
-        if datetime_str.startswith("+"):
-            # 移除多余的空格并分割
-            parts = [p for p in datetime_str.strip().split(" ") if p]
-            if len(parts) >= 2:
-                # 提取数字部分
-                number_part = ""
-                for char in parts[0][1:]:  # 跳过 "+" 符号
-                    if char.isdigit():
-                        number_part += char
-                    else:
-                        break
-                
-                if number_part:
-                    amount = int(number_part)
-                    # 获取单位部分
-                    unit = parts[1].lower() if len(parts) > 1 else "hours"
-                    
-                    now = datetime.now()
-                    if unit in ["hour", "hours"]:
-                        reminder_time = now + timedelta(hours=amount)
-                    elif unit in ["minute", "minutes"]:
-                        reminder_time = now + timedelta(minutes=amount)
-                    elif unit in ["day", "days"]:
-                        reminder_time = now + timedelta(days=amount)
-                    else:
-                        raise ValueError(f"Unsupported time unit: {unit}")
-                else:
-                    raise ValueError("No valid number found in relative time")
-            else:
-                raise ValueError("Invalid relative time format")
-        else:
-            # 尝试解析 ISO 格式
-            reminder_time = datetime.fromisoformat(datetime_str)
-        
-        # 验证时间是否在未来
-        if reminder_time <= datetime.now():
-            raise ValueError("Reminder time must be in the future")
-        
-        # 格式化提醒消息
-        time_str = reminder_time.strftime("%Y-%m-%d %H:%M:%S")
-        participants_str = ", ".join(participants) if participants else "无"
-        
-        return (
-            f"提醒创建成功:\n"
-            f"- 标题: {title}\n"
-            f"- 时间: {time_str}\n"
-            f"- 优先级: {priority}\n"
-            f"- 参与者: {participants_str}"
-        )
-        
-    except ValueError as e:
-        raise ValueError(
-            f"Invalid datetime format. Supported formats:\n"
-            f"1. ISO format: YYYY-MM-DDTHH:MM:SS\n"
-            f"2. Relative time: +N hours/minutes/days\n"
-            f"Error: {str(e)}"
-        )
-
-@log_function_call
-def search_restaurants(
-    location: str,
-    cuisine_type: Optional[str] = None,
-    price_range: Optional[str] = None,
-    min_rating: float = 4.0
-) -> List[Dict]:
-    """搜索餐厅"""
-    # 模拟餐厅数据库
-    sample_restaurants = [
-        {
-            "name": "北京烤鸭店",
-            "cuisine": "中餐",
-            "price_range": "$$",
-            "rating": 4.5,
-            "location": "北京",
-            "address": "王府井大街123号"
-        },
-        {
-            "name": "Pasta House",
-            "cuisine": "意餐",
-            "price_range": "$$$",
-            "rating": 4.3,
-            "location": "北京",
-            "address": "朝阳区国贸大厦"
-        }
-    ]
-    
-    # 过滤逻辑
-    results = [r for r in sample_restaurants if r["location"] == location]
-    if cuisine_type:
-        results = [r for r in results if r["cuisine"] == cuisine_type]
-    if price_range:
-        results = [r for r in results if r["price_range"] == price_range]
-    results = [r for r in results if r["rating"] >= min_rating]
-    
-    return results
-
-# Function descriptions for GPT
+# 高级函数描述
 ADVANCED_FUNCTION_DESCRIPTIONS = [
     {
         "name": "get_weather",
@@ -208,13 +36,11 @@ ADVANCED_FUNCTION_DESCRIPTIONS = [
                 },
                 "from_currency": {
                     "type": "string",
-                    "description": "原始货币代码 (USD, CNY, EUR, JPY)",
-                    "enum": ["USD", "CNY", "EUR", "JPY"]
+                    "description": "源货币代码（如USD、CNY等）"
                 },
                 "to_currency": {
                     "type": "string",
-                    "description": "目标货币代码 (USD, CNY, EUR, JPY)",
-                    "enum": ["USD", "CNY", "EUR", "JPY"]
+                    "description": "目标货币代码（如USD、CNY等）"
                 }
             },
             "required": ["amount", "from_currency", "to_currency"]
@@ -282,6 +108,149 @@ ADVANCED_FUNCTION_DESCRIPTIONS = [
         }
     }
 ]
+
+@dataclass
+class WeatherInfo:
+    temperature: float
+    humidity: float
+    description: str
+    location: str
+    timestamp: str
+    
+    def to_dict(self) -> Dict:
+        """转换为字典以便JSON序列化"""
+        return asdict(self)
+
+@log_function_call
+def get_weather(city: str, country: str = "CN") -> WeatherInfo:
+    """获取指定城市的天气信息"""
+    # 这里模拟天气API调用
+    weather_data = {
+        "temp": 23.5,
+        "humidity": 65,
+        "desc": "晴朗",
+        "city": city,
+        "country": country,
+    }
+    return WeatherInfo(
+        temperature=weather_data["temp"],
+        humidity=weather_data["humidity"],
+        description=weather_data["desc"],
+        location=f"{city}, {country}",
+        timestamp=datetime.now().isoformat()
+    )
+
+@log_function_call
+def currency_convert(amount: float, from_currency: str, to_currency: str) -> Dict:
+    """货币转换功能"""
+    # 模拟汇率API调用
+    # 基准汇率（以CNY为基准）
+    base_rates = {
+        "USD": 0.155,  # 1 CNY = 0.155 USD
+        "EUR": 0.127,  # 1 CNY = 0.127 EUR
+        "JPY": 16.95,  # 1 CNY = 16.95 JPY
+        "CNY": 1.0     # 1 CNY = 1.0 CNY
+    }
+    
+    if from_currency not in base_rates or to_currency not in base_rates:
+        raise ValueError(f"Unsupported currency: {from_currency} or {to_currency}")
+    
+    # 先转换为CNY，再转换为目标货币
+    amount_in_cny = amount / base_rates[from_currency]
+    converted = amount_in_cny * base_rates[to_currency]
+    
+    return {
+        "original_amount": amount,
+        "converted_amount": round(converted, 2),
+        "from_currency": from_currency,
+        "to_currency": to_currency,
+        "rate": round(base_rates[to_currency] / base_rates[from_currency], 4),
+        "timestamp": datetime.now().isoformat()
+    }
+
+@log_function_call
+def schedule_reminder(title: str, datetime_str: str, priority: str = "normal", participants: List[str] = None) -> Dict:
+    """创建日程提醒"""
+    # 解析时间字符串
+    if datetime_str.startswith('+'):
+        # 处理相对时间
+        parts = datetime_str[1:].split()
+        if len(parts) != 2:
+            raise ValueError("Invalid relative time format. Expected format: '+N hours/minutes/days'")
+        
+        amount = int(parts[0])
+        unit = parts[1].lower()
+        
+        if unit not in ['hours', 'minutes', 'days']:
+            raise ValueError("Invalid time unit. Must be 'hours', 'minutes', or 'days'")
+        
+        delta = {
+            'hours': timedelta(hours=amount),
+            'minutes': timedelta(minutes=amount),
+            'days': timedelta(days=amount)
+        }[unit]
+        
+        reminder_time = datetime.now() + delta
+    else:
+        # 处理ISO格式时间
+        reminder_time = datetime.fromisoformat(datetime_str)
+    
+    # 创建提醒
+    reminder = {
+        "title": title,
+        "time": reminder_time.isoformat(),
+        "priority": priority,
+        "participants": participants or []
+    }
+    
+    return reminder
+
+@log_function_call
+def search_restaurants(location: str, cuisine_type: str = None, price_range: str = None, min_rating: float = 4.0) -> List[Dict]:
+    """搜索餐厅"""
+    # 模拟餐厅数据库
+    restaurants = [
+        {
+            "name": "北京烤鸭店",
+            "cuisine": "中餐",
+            "location": "北京",
+            "price_range": "$$",
+            "rating": 4.5
+        },
+        {
+            "name": "意大利面屋",
+            "cuisine": "意大利菜",
+            "location": "北京",
+            "price_range": "$$$",
+            "rating": 4.2
+        },
+        {
+            "name": "寿司之家",
+            "cuisine": "日本料理",
+            "location": "北京",
+            "price_range": "$$$",
+            "rating": 4.7
+        }
+    ]
+    
+    # 过滤结果
+    results = []
+    for restaurant in restaurants:
+        if restaurant["location"] != location:
+            continue
+            
+        if cuisine_type and restaurant["cuisine"] != cuisine_type:
+            continue
+            
+        if price_range and restaurant["price_range"] != price_range:
+            continue
+            
+        if restaurant["rating"] < min_rating:
+            continue
+            
+        results.append(restaurant)
+    
+    return results
 
 if __name__ == "__main__":
     # 测试天气功能

@@ -1,8 +1,12 @@
 from openai import AzureOpenAI
 from typing import Dict, List, Any, Optional
 
-from exam_funcall_simple import config
-from exam_funcall_simple.infra_logger import LogType, setup_logger, log_debug
+from exam_funcall_simple.function_caller.infra.config import (
+    AZURE_OPENAI_API_KEY,
+    AZURE_OPENAI_VERSION,
+    AZURE_OPENAI_ENDPOINT
+)
+from exam_funcall_simple.function_caller.infra.logger import LogType, setup_logger, log_debug
 
 class GPTBase:
     """GPT调用器基类，提供基础功能"""
@@ -13,9 +17,9 @@ class GPTBase:
             debug: 是否启用调试模式
         """
         self.client = AzureOpenAI(
-            api_key=config.AZURE_OPENAI_API_KEY,
-            api_version=config.AZURE_OPENAI_VERSION,
-            azure_endpoint=config.AZURE_OPENAI_ENDPOINT
+            api_key=AZURE_OPENAI_API_KEY,
+            api_version=AZURE_OPENAI_VERSION,
+            azure_endpoint=AZURE_OPENAI_ENDPOINT
         )
         
         self.debug = debug

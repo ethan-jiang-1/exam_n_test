@@ -1,50 +1,49 @@
-import sys
+"""运行所有测试"""
 import os
-
-# 添加项目根目录到Python路径
-project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(project_root)
-
-# 导入所有测试模块
-# 简单函数单步测试
-from exam_funcall_simple.test_simple_time_query import test_simple_time_query
-from exam_funcall_simple.test_simple_circle_area import test_simple_circle_area
-from exam_funcall_simple.test_simple_conversation_history import test_simple_conversation_history
-from exam_funcall_simple.test_simple_system_message import test_simple_system_message
-
-# 高级函数单步测试
-from exam_funcall_simple.test_advanced_single_weather import test_advanced_single_weather
-from exam_funcall_simple.test_advanced_single_currency import test_advanced_single_currency
-from exam_funcall_simple.test_advanced_single_reminder import test_advanced_single_reminder
-from exam_funcall_simple.test_advanced_single_restaurant import test_advanced_single_restaurant
-
-# 多步骤测试
-from exam_funcall_simple.test_multisteps_mixed_functions import test_multisteps_mixed_functions
-from exam_funcall_simple.test_multisteps_weather import test_multisteps_weather
-from exam_funcall_simple.test_multisteps_currency import test_multisteps_currency
-from exam_funcall_simple.test_multisteps_reminder import test_multisteps_reminder
-from exam_funcall_simple.test_multisteps_restaurant import test_multisteps_restaurant
+import importlib
+import traceback
+from exam_funcall_simple.function_caller.infra import print_test_header
 
 def run_all_tests():
-    """运行所有测试"""
-    print("\n=== 运行简单函数单步测试 ===")
-    test_simple_time_query()
-    test_simple_circle_area()
-    test_simple_conversation_history()
-    test_simple_system_message()
+    """运行所有测试文件"""
+    print_test_header("运行所有测试")
     
-    print("\n=== 运行高级函数单步测试 ===")
-    test_advanced_single_weather()
-    test_advanced_single_currency()
-    test_advanced_single_reminder()
-    test_advanced_single_restaurant()
+    # 获取所有测试文件
+    test_files = [
+        f[:-3] for f in os.listdir(os.path.dirname(__file__))
+        if f.startswith('test_') and f.endswith('.py')
+    ]
     
-    print("\n=== 运行多步骤测试 ===")
-    test_multisteps_mixed_functions()
-    test_multisteps_weather()
-    test_multisteps_currency()
-    test_multisteps_reminder()
-    test_multisteps_restaurant()
+    # 运行每个测试
+    success = 0
+    failed = 0
+    for test_file in sorted(test_files):
+        try:
+            print(f"\n运行测试: {test_file}")
+            module = importlib.import_module(f"exam_funcall_simple.{test_file}")
+            
+            # 查找并运行测试函数
+            test_funcs = [
+                f for f in dir(module)
+                if f.startswith('test_') and callable(getattr(module, f))
+            ]
+            
+            for func_name in test_funcs:
+                test_func = getattr(module, func_name)
+                test_func()
+                success += 1
+                
+        except Exception as e:
+            print(f"测试失败: {test_file}")
+            print(f"错误信息: {str(e)}")
+            print(traceback.format_exc())
+            failed += 1
+    
+    # 打印统计信息
+    print("\n测试完成!")
+    print(f"成功: {success}")
+    print(f"失败: {failed}")
+    print(f"总计: {success + failed}")
 
 if __name__ == "__main__":
     run_all_tests() 

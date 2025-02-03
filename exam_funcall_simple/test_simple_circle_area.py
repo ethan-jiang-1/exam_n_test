@@ -1,6 +1,13 @@
-from exam_funcall_simple.gpt_caller import GPTFunctionCaller
-from exam_funcall_simple import func_simple
-from exam_funcall_simple.base_logger import print_test_header, print_user_input, print_request_data, print_api_response, print_function_result, print_execution_time
+from exam_funcall_simple.func_simple import get_current_time, calculate_circle_area, FUNCTION_DESCRIPTIONS as functions
+from exam_funcall_simple.function_caller import GPTFunctionCaller
+from exam_funcall_simple.function_caller.infra import (
+    print_test_header,
+    print_user_input,
+    print_request_data,
+    print_api_response,
+    print_function_result,
+    print_execution_time
+)
 
 def test_circle_area():
     """测试场景：计算指定半径圆的面积"""
@@ -8,10 +15,10 @@ def test_circle_area():
     
     # 初始化函数调用器
     caller = GPTFunctionCaller(
-        functions=func_simple.FUNCTION_DESCRIPTIONS,
+        functions=functions,
         function_map={
-            "get_current_time": func_simple.get_current_time,
-            "calculate_circle_area": func_simple.calculate_circle_area
+            "get_current_time": get_current_time,
+            "calculate_circle_area": calculate_circle_area
         }
     )
     

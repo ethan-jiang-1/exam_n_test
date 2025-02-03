@@ -1,6 +1,6 @@
 from datetime import datetime
 import math
-from exam_funcall_simple.base_logger import log_function_call
+from exam_funcall_simple.function_caller.infra import log_function_call
 
 @log_function_call
 def get_current_time():

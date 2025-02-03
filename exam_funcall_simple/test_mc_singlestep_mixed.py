@@ -1,7 +1,18 @@
-from exam_funcall_simple.gpt_caller import GPTFunctionCaller
-from exam_funcall_simple import func_simple
+from exam_funcall_simple.func_simple import get_current_time, FUNCTION_DESCRIPTIONS as functions
+from exam_funcall_simple.function_caller import GPTFunctionCaller
 from exam_funcall_simple import func_advanced
-from exam_funcall_simple.base_logger import print_test_header, print_user_input, print_request_data, print_api_response, print_execution_time
+from exam_funcall_simple.function_caller.infra import (
+    print_test_header,
+    print_user_input,
+    print_system_message,
+    print_request_data,
+    print_api_response,
+    print_function_result,
+    print_execution_time,
+    print_conversation_history,
+    log_function_call,
+    TestLogger
+)
 
 def test_singlestep_mixed():
     """测试时间查询、提醒设置和餐厅搜索的混合场景"""
@@ -9,10 +20,10 @@ def test_singlestep_mixed():
     
     # 初始化函数调用器
     caller = GPTFunctionCaller(
-        functions=func_simple.FUNCTION_DESCRIPTIONS + func_advanced.ADVANCED_FUNCTION_DESCRIPTIONS,
+        functions=functions + func_advanced.ADVANCED_FUNCTION_DESCRIPTIONS,
         function_map={
             **{
-                "get_current_time": func_simple.get_current_time,
+                "get_current_time": get_current_time,
             },
             **{
                 "schedule_reminder": func_advanced.schedule_reminder,

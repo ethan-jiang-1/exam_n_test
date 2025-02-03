@@ -1,7 +1,19 @@
-from exam_funcall_simple.gpt_caller import GPTFunctionCaller
+from exam_funcall_simple.func_simple import get_current_time
+from exam_funcall_simple.function_caller import GPTFunctionCaller
 from exam_funcall_simple import func_simple
 from exam_funcall_simple import func_advanced
-from exam_funcall_simple.base_logger import print_test_header, print_user_input, print_request_data, print_api_response, print_execution_time
+from exam_funcall_simple.function_caller.infra import (
+    print_test_header,
+    print_user_input,
+    print_system_message,
+    print_request_data,
+    print_api_response,
+    print_function_result,
+    print_execution_time,
+    print_conversation_history,
+    log_function_call,
+    TestLogger
+)
 
 def test_singlestep_time_weather():
     """测试时间和天气组合查询"""
@@ -10,11 +22,11 @@ def test_singlestep_time_weather():
     # 初始化函数调用器
     caller = GPTFunctionCaller(
         functions=[
-            func_simple.FUNCTION_DESCRIPTIONS[0],  # get_current_time
+            functions[0],  # get_current_time
             func_advanced.ADVANCED_FUNCTION_DESCRIPTIONS[0]  # get_weather
         ],
         function_map={
-            "get_current_time": func_simple.get_current_time,
+            "get_current_time": get_current_time,
             "get_weather": func_advanced.get_weather
         }
     )

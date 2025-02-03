@@ -1,15 +1,15 @@
 import sys
-from test_multisteps_reminder import test_multisteps_reminder
-from test_multisteps_restaurant import test_multisteps_restaurant
-from test_multisteps_weather import test_multisteps_weather
-from test_advanced_single_reminder import test_advanced_single_reminder
-from test_advanced_single_restaurant import test_advanced_single_restaurant
-from test_mc_singlestep_circle_price import test_singlestep_circle_price
-from test_mc_singlestep_meeting_restaurant import test_singlestep_meeting_restaurant
-from test_mc_singlestep_mixed import test_singlestep_mixed
-from test_mc_singlestep_time_weather import test_singlestep_time_weather
-from test_multicall_singlestep_mixed import test_singlestep_time_weather as test_multicall_singlestep_time_weather
-from test_multisteps_mixed_functions import test_multisteps_mixed_functions
+from exam_funcall_simple.test_multisteps_reminder import test_multisteps_reminder
+from exam_funcall_simple.test_multisteps_restaurant import test_multisteps_restaurant
+from exam_funcall_simple.test_multisteps_weather import test_multisteps_weather
+from exam_funcall_simple.test_advanced_single_reminder import test_advanced_single_reminder
+from exam_funcall_simple.test_advanced_single_restaurant import test_advanced_single_restaurant
+from exam_funcall_simple.test_mc_singlestep_circle_price import test_singlestep_circle_price
+from exam_funcall_simple.test_mc_singlestep_meeting_restaurant import test_singlestep_meeting_restaurant
+from exam_funcall_simple.test_mc_singlestep_mixed import test_singlestep_mixed
+from exam_funcall_simple.test_mc_singlestep_time_weather import test_singlestep_time_weather
+from exam_funcall_simple.test_multicall_singlestep_mixed import test_singlestep_time_weather as test_multicall_singlestep_time_weather
+from exam_funcall_simple.test_multisteps_mixed_functions import test_multisteps_mixed_functions
 
 def run_failed_tests():
     """运行失败的测试用例"""
@@ -19,7 +19,7 @@ def run_failed_tests():
     failed_tests = [
         # (测试名称, 测试函数, 是否启用)
         ("test_multisteps_reminder", test_multisteps_reminder, False),  # 已通过，禁用
-        ("test_multisteps_restaurant", test_multisteps_restaurant, True),
+        ("test_multisteps_restaurant", test_multisteps_restaurant, False),  # 已通过，禁用
         ("test_multisteps_weather", test_multisteps_weather, True),
         ("test_advanced_single_reminder", test_advanced_single_reminder, True),
         ("test_advanced_single_restaurant", test_advanced_single_restaurant, True),

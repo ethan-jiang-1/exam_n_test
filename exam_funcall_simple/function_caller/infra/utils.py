@@ -1,6 +1,6 @@
 """测试辅助函数"""
-from typing import Any, Dict, List, Optional
-from .logger import LogType, log_debug
+from typing import Any, Dict, List  # , Optional
+#from .logger import LogType, log_debug
 
 def print_test_header(test_name: str):
     """打印测试标题"""

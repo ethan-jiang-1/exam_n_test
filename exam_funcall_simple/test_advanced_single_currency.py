@@ -3,14 +3,14 @@ from exam_funcall_simple import func_advanced
 from exam_funcall_simple.function_caller.infra import (
     print_test_header,
     print_user_input,
-    print_system_message,
+    #print_system_message,
     print_request_data,
     print_api_response,
     print_function_result,
     print_execution_time,
-    print_conversation_history,
-    log_function_call,
-    TestLogger
+    #print_conversation_history,
+    #log_function_call,
+    #TestLogger
 )
 
 def test_advanced_single_currency():

@@ -91,16 +91,35 @@ response = caller.call_single_function("计算圆的面积")
 
 ## 运行测试
 
-所有测试文件都可以直接运行：
-```bash
-# 运行单个测试
-python test_simple_time_query.py
-python test_advanced_single_weather.py
-python test_multisteps_mixed_functions.py
+我们采用直接运行 Python 脚本的方式执行测试，不使用 unittest 或 pytest 等测试框架。这种方式简单直观，便于理解和调试。
 
-# 运行所有测试
-python run_all_tests.py
+### 运行单个测试
+直接使用 Python 解释器运行测试文件：
+```bash
+# 运行单个测试文件
+python3 exam_funcall_simple/test_simple_time_query.py
+python3 exam_funcall_simple/test_advanced_single_weather.py
+python3 exam_funcall_simple/test_multisteps_mixed_functions.py
 ```
+
+### 运行所有测试
+使用 `run_failed_tests.py` 运行所有失败的测试：
+```bash
+python3 exam_funcall_simple/run_failed_tests.py
+```
+
+### 测试结果查看
+- 每个测试文件运行时会打印详细的执行过程
+- 包括输入、API 调用、函数执行和输出结果
+- 如果测试通过，程序正常退出
+- 如果测试失败，会显示具体的错误信息和失败原因
+
+### 调试测试
+由于是直接运行 Python 脚本，可以：
+- 使用 print 语句输出调试信息
+- 在 IDE 中设置断点进行调试
+- 修改代码后直接重新运行
+- 不需要记忆或使用测试框架的特殊命令
 
 ## 配置说明
 

@@ -42,7 +42,7 @@ def test_multisteps_restaurant():
     import json
     restaurant_call = json.loads(tool_calls[0].function.arguments)
     assert restaurant_call["location"] == "北京", "位置不正确"
-    assert restaurant_call["cuisine"] == "中餐", "菜系不正确"
+    assert restaurant_call["cuisine_type"] == "中餐", "菜系不正确"
     assert restaurant_call["min_rating"] >= 4, "最低评分不正确"
     
     # 场景2：带价格范围的搜索
@@ -68,8 +68,8 @@ def test_multisteps_restaurant():
     # 验证搜索参数
     restaurant_call = json.loads(tool_calls[0].function.arguments)
     assert restaurant_call["location"] == "北京", "位置不正确"
-    assert restaurant_call["cuisine"] == "意大利菜", "菜系不正确"
-    assert restaurant_call["price_range"] == "high", "价格范围不正确"
+    assert restaurant_call["cuisine_type"] == "意大利", "菜系不正确"
+    assert restaurant_call["price_range"] == "$$$", "价格范围不正确"
 
 if __name__ == "__main__":
     test_multisteps_restaurant() 

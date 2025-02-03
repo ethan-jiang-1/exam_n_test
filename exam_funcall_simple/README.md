@@ -2,19 +2,56 @@
 
 这是一个用于测试 GPT 函数调用功能的项目。项目采用简单直通的测试方式，无需复杂的测试框架。
 
-## 项目结构
+## 架构设计
 
+项目采用清晰的分层架构，将函数调用机制与具体函数实现分离：
+
+### 核心架构
 ```
 exam_funcall_simple/
-├── gpt_caller.py          # GPT函数调用器核心实现
-├── func_simple.py         # 简单函数实现
-├── func_advanced.py       # 高级函数实现
-├── config.py             # 配置文件
-├── utils_test.py         # 测试辅助函数
-├── test_simple_*.py      # 简单函数单步测试
-├── test_advanced_*.py    # 高级函数单步测试
-├── test_multisteps_*.py  # 多步骤测试场景
-└── run_*.py             # 测试运行脚本
+├── function_caller/           # 所有内部实现
+│   ├── __init__.py           # 只暴露 GPTFunctionCaller
+│   ├── func_caller.py        # 主调用器实现
+│   ├── func_handlers.py      # 函数调用处理
+│   ├── func_utils.py         # 工具函数
+│   ├── infra/               # 基础设施目录
+│   │   ├── logger.py        # 日志功能
+│   │   ├── base_caller.py   # 基础调用器
+│   │   └── config.py        # 配置
+│   └── core/                # 核心功能目录
+│       └── text_caller.py   # 文本调用器
+│
+├── func_simple.py            # 简单函数实现
+├── func_advanced.py          # 高级函数实现
+├── test_*.py                # 所有测试文件
+└── run_all_tests.py         # 测试运行器
+```
+
+### 设计理念
+1. **关注点分离**
+   - 核心调用机制封装在 `function_caller` 目录中
+   - 具体函数实现在外部定义
+   - 测试代码独立维护
+
+2. **清晰的接口**
+   - 对外只暴露 `GPTFunctionCaller` 类
+   - 内部实现细节对外部不可见
+   - 使用绝对导入保证依赖关系清晰
+
+3. **易于扩展**
+   - 添加新函数不需要修改核心代码
+   - 基础设施代码集中管理
+   - 测试用例可以独立添加
+
+4. **使用示例**
+```python
+from exam_funcall_simple.function_caller import GPTFunctionCaller
+
+# 创建调用器实例
+caller = GPTFunctionCaller(functions, function_map)
+
+# 使用调用器
+response = caller.call_single_function("计算圆的面积")
 ```
 
 ## 测试设计理念

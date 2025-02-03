@@ -20,7 +20,7 @@ Key concepts covered:
 from datetime import datetime, timedelta
 from typing import List, Optional, Dict, Any
 from functools import cached_property
-from pydantic import BaseModel, Field, computed_field
+from pydantic import BaseModel, Field, computed_field, field_validator, model_validator
 import math
 
 
@@ -162,6 +162,85 @@ class ExpenseTracker(BaseModel):
         return self.remaining_budget / self.days_remaining
 
 
+class PriceCalculator(BaseModel):
+    """
+    Price calculator demonstrating field validators with dependencies.
+    
+    Attributes:
+        base_price: Base price of the item
+        quantity: Number of items
+        discount_percent: Optional discount percentage
+        tax_rate: Tax rate percentage
+        is_wholesale: Whether this is a wholesale order
+    """
+    base_price: float = Field(gt=0)
+    quantity: int = Field(gt=0)
+    discount_percent: Optional[float] = Field(None, ge=0, le=100)
+    tax_rate: float = Field(ge=0, le=100)
+    is_wholesale: bool = False
+    
+    @field_validator('discount_percent')
+    @classmethod
+    def validate_discount(cls, v: Optional[float], info) -> Optional[float]:
+        """Validate discount based on quantity."""
+        if v is None:
+            return v
+            
+        quantity = info.data.get('quantity', 0)
+        is_wholesale = info.data.get('is_wholesale', False)
+        
+        # Maximum discount rules
+        if is_wholesale and v > 40:
+            raise ValueError("Wholesale discount cannot exceed 40%")
+        elif not is_wholesale and v > 25:
+            raise ValueError("Retail discount cannot exceed 25%")
+            
+        # Minimum quantity for discount
+        if quantity < 5 and v > 10:
+            raise ValueError("Orders less than 5 items cannot have discount > 10%")
+            
+        return v
+    
+    @model_validator(mode='after')
+    def validate_total_price(self) -> 'PriceCalculator':
+        """Validate the final price is not below minimum threshold."""
+        total = self.total_price
+        if total < 0:
+            raise ValueError("Total price cannot be negative")
+        
+        min_price = 5.0 if not self.is_wholesale else 100.0
+        if total < min_price:
+            raise ValueError(f"Total price cannot be less than ${min_price}")
+            
+        return self
+    
+    @computed_field
+    @property
+    def subtotal(self) -> float:
+        """Calculate subtotal before tax and discount."""
+        return self.base_price * self.quantity
+    
+    @computed_field
+    @property
+    def discount_amount(self) -> float:
+        """Calculate discount amount."""
+        if not self.discount_percent:
+            return 0.0
+        return self.subtotal * (self.discount_percent / 100)
+    
+    @computed_field
+    @property
+    def tax_amount(self) -> float:
+        """Calculate tax amount (applied after discount)."""
+        return (self.subtotal - self.discount_amount) * (self.tax_rate / 100)
+    
+    @computed_field
+    @property
+    def total_price(self) -> float:
+        """Calculate final price including discount and tax."""
+        return self.subtotal - self.discount_amount + self.tax_amount
+
+
 def demonstrate_computed_fields():
     """Demonstrate the usage of computed fields."""
     # Circle example
@@ -202,6 +281,55 @@ def demonstrate_computed_fields():
         print(f"  {category}: ${amount:.2f}")
     print(f"Days Remaining: {tracker.days_remaining}")
     print(f"Daily Budget Remaining: ${tracker.daily_budget_remaining:.2f}")
+    
+    # Price calculator example
+    print("\n=== Price Calculations ===")
+    
+    # Retail order example
+    try:
+        retail_calc = PriceCalculator(
+            base_price=29.99,
+            quantity=3,
+            discount_percent=10,
+            tax_rate=8.5,
+            is_wholesale=False
+        )
+        print("Retail Order:")
+        print(f"Subtotal: ${retail_calc.subtotal:.2f}")
+        print(f"Discount: ${retail_calc.discount_amount:.2f}")
+        print(f"Tax: ${retail_calc.tax_amount:.2f}")
+        print(f"Total: ${retail_calc.total_price:.2f}")
+    except ValueError as e:
+        print(f"Retail validation error: {e}")
+    
+    # Wholesale order example
+    try:
+        wholesale_calc = PriceCalculator(
+            base_price=19.99,
+            quantity=50,
+            discount_percent=35,
+            tax_rate=8.5,
+            is_wholesale=True
+        )
+        print("\nWholesale Order:")
+        print(f"Subtotal: ${wholesale_calc.subtotal:.2f}")
+        print(f"Discount: ${wholesale_calc.discount_amount:.2f}")
+        print(f"Tax: ${wholesale_calc.tax_amount:.2f}")
+        print(f"Total: ${wholesale_calc.total_price:.2f}")
+    except ValueError as e:
+        print(f"Wholesale validation error: {e}")
+    
+    # Invalid discount example
+    try:
+        PriceCalculator(
+            base_price=10.0,
+            quantity=2,
+            discount_percent=30,  # This should fail validation
+            tax_rate=8.5,
+            is_wholesale=False
+        )
+    except ValueError as e:
+        print(f"\nValidation error (as expected): {e}")
 
 
 if __name__ == "__main__":

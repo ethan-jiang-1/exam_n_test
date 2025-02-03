@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from typing import List, Dict
 from dataclasses import dataclass, asdict
-from exam_funcall_simple.function_caller.infra import logger
+from exam_funcall_simple.function_caller.infra import logger, log_function_call
 
 # 高级函数描述
 ADVANCED_FUNCTION_DESCRIPTIONS = [
@@ -149,7 +149,7 @@ def get_weather(city: str, country: str = "CN") -> WeatherInfo:
         timestamp=datetime.now().isoformat()
     )
 
-@log_function
+@log_function_call("currency_convert")
 def currency_convert(amount: float, from_currency: str, to_currency: str) -> Dict:
     """货币转换功能"""
     # 模拟汇率API调用

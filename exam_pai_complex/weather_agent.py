@@ -28,7 +28,7 @@ logfire.configure(send_to_logfire='if-token-present')
 from dotenv import load_dotenv
 load_dotenv()
 
-from exam_pydantic_ai.openai_model import get_model
+from exam_pai_complex.async_model import get_model
 
 @dataclass
 class Deps:

@@ -2,15 +2,13 @@ import asyncio
 from dataclasses import dataclass
 
 import httpx
+from dotenv import load_dotenv
 
 from pydantic_ai import Agent, RunContext
 
-import sys 
+load_dotenv()
 
-if "./" not in sys.path:
-    sys.path.append("./")
-
-from exam_pydantic_ai.async_model import get_gpt_model
+from exam_pai_complex.async_model import get_gpt_model
 model = get_gpt_model()
 
 
@@ -47,4 +45,4 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    asyncio.run(main()) 

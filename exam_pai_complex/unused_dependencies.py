@@ -1,14 +1,13 @@
 from dataclasses import dataclass
 import asyncio
 import httpx
+from dotenv import load_dotenv
 
 from pydantic_ai import Agent
-import sys 
 
-if "./" not in sys.path:
-    sys.path.append("./")
+load_dotenv()
 
-from exam_pydantic_ai.async_model import get_gpt_model
+from exam_pai_complex.async_model import get_gpt_model
 model_gpt = get_gpt_model()
 
 

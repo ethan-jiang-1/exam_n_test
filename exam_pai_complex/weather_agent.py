@@ -28,7 +28,7 @@ logfire.configure(send_to_logfire='if-token-present')
 from dotenv import load_dotenv
 load_dotenv()
 
-from exam_pai_complex.async_model import get_model
+from exam_pai_complex.async_model import get_gpt_model
 
 @dataclass
 class Deps:
@@ -37,7 +37,7 @@ class Deps:
     geo_api_key: str | None
 
 
-model = get_model()
+model = get_gpt_model()
 
 weather_agent = Agent(
     #'openai:gpt-4o',

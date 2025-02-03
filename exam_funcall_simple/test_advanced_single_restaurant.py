@@ -43,8 +43,12 @@ def test_advanced_single_restaurant():
     import json
     restaurant_call = json.loads(tool_calls[0].function.arguments)
     assert restaurant_call["location"] == "北京", "位置不正确"
-    assert restaurant_call["cuisine"] == "中餐", "菜系不正确"
+    assert restaurant_call["cuisine_type"] == "中餐", "菜系不正确"
     assert restaurant_call["min_rating"] >= 4, "最低评分不正确"
+    
+    # 验证函数调用成功
+    response_content = response.choices[0].message.content
+    assert "北京烤鸭店" in response_content and "4.5" in response_content, "响应消息不包含必要信息"
 
 if __name__ == "__main__":
     test_advanced_single_restaurant() 

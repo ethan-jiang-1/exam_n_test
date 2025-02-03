@@ -6,13 +6,9 @@ from exam_funcall_simple.function_caller.infra import (
     print_user_input,
     print_request_data,
     print_api_response,
-    print_execution_time,
-    TestLogger
+    print_execution_time
 )
-import json
 from dataclasses import dataclass
-from datetime import datetime
-from typing import Any, Dict
 
 @dataclass
 class CirclePrice:
@@ -57,103 +53,33 @@ def test_singlestep_circle_price():
     )
     
     # 执行调用
-    response = caller.call_single_function(case.prompt, system_message=case.system_message)
+    response = caller.call_with_conversation(
+        case.prompt,
+        system_message=case.system_message
+    )
+    
     print_request_data(caller.last_request)
     print_api_response(response.model_dump())
     print_execution_time(caller.execution_time)
     
-    # 处理结果
-    logger = TestLogger()
-    if not (response.choices and response.choices[0].message.tool_calls):
-        logger.print_error("函数调用失败")
-        return
-        
-    # 执行函数调用并收集结果
-    results = {}
-    for tool_call in response.choices[0].message.tool_calls:
-        if tool_call.function.name == "calculate_circle_area":
-            results[tool_call.function.name] = calculate_circle_area(
-                **json.loads(tool_call.function.arguments)
-            )
-        elif tool_call.function.name == "currency_convert":
-            results[tool_call.function.name] = func_advanced.currency_convert(
-                **json.loads(tool_call.function.arguments)
-            )
+    # 验证结果
+    assert response.choices[0].message.tool_calls is not None, "没有函数调用"
+    tool_calls = response.choices[0].message.tool_calls
+    assert len(tool_calls) == 2, "应该有2个函数调用"
     
-    # 让模型生成最终结果展示
-    if len(results) == 2:  # 两个函数都调用成功
-        result_prompt = (
-            f"请将计算结果整理成易于理解的格式：\n"
-            f"1. 圆形面积计算结果：{results['calculate_circle_area']}\n"
-            f"2. 货币转换结果：{json.dumps(results['currency_convert'], ensure_ascii=False)}"
-        )
-        
-        format_response = caller.call_single_function(result_prompt)
-        if format_response.choices and format_response.choices[0].message.content:
-            logger.print_panel("最终结果", format_response.choices[0].message.content, "green")
-            logger.print_success("所有计算已完成")
-        else:
-            logger.print_error("结果格式化失败")
-    else:
-        logger.print_error("无法获取完整的计算结果")
-
-def currency_convert(amount: float, from_currency: str, to_currency: str) -> Dict[str, Any]:
-    """模拟货币转换功能"""
-    rates = {
-        "EUR": {"CNY": 7.874},
-        "CNY": {"EUR": 1/7.874}
-    }
+    # 验证函数调用顺序和参数
+    assert tool_calls[0].function.name == "calculate_circle_area", "第一个调用应该是calculate_circle_area"
+    assert tool_calls[1].function.name == "currency_convert", "第二个调用应该是currency_convert"
     
-    rate = rates[from_currency][to_currency]
-    converted_amount = amount * rate
+    # 验证参数
+    import json
+    circle_call = json.loads(tool_calls[0].function.arguments)
+    currency_call = json.loads(tool_calls[1].function.arguments)
     
-    return {
-        "original_amount": amount,
-        "converted_amount": converted_amount,
-        "from_currency": from_currency,
-        "to_currency": to_currency,
-        "rate": rate,
-        "timestamp": datetime.now().isoformat()
-    }
-
-def run_test() -> None:
-    """运行圆形桌子面积计算和价格转换测试"""
-    
-    # 1. 准备测试数据
-    radius = 0.8  # 半径（米）
-    price_eur = 230  # 价格（欧元）
-    
-    # 2. 调用函数计算
-    area = calculate_circle_area(radius=radius)
-    conversion = currency_convert(
-        amount=price_eur,
-        from_currency="EUR",
-        to_currency="CNY"
-    )
-    
-    # 3. 格式化结果
-    result = format_results(area, conversion)
-    
-    # 4. 输出结果
-    print("\n" + "─" * 50 + " 测试结果 " + "─" * 50 + "\n")
-    print(result)
-    print("\n" + "─" * 120 + "\n")
-
-def format_results(area: float, conversion: Dict[str, Any]) -> str:
-    """格式化计算结果为易读的文本"""
-    timestamp = datetime.fromisoformat(conversion['timestamp'].replace('Z', '+00:00'))
-    
-    return f"""计算结果：
-
-1. 圆形桌子面积
-   - 面积：{area:.2f} 平方米
-
-2. 价格转换
-   - 原始价格：{conversion['original_amount']} {conversion['from_currency']}
-   - 转换价格：{conversion['converted_amount']:.2f} {conversion['to_currency']}
-   - 使用汇率：1 {conversion['from_currency']} = {conversion['rate']:.3f} {conversion['to_currency']}
-   - 计算时间：{timestamp.strftime('%Y年%m月%d日 %H:%M:%S')}"""
+    assert circle_call["radius"] == case.radius, "圆形面积计算的半径不正确"
+    assert currency_call["amount"] == case.amount, "货币转换的金额不正确"
+    assert currency_call["from_currency"] == case.currency[0], "源货币不正确"
+    assert currency_call["to_currency"] == case.target_currency[0], "目标货币不正确"
 
 if __name__ == "__main__":
-    test_singlestep_circle_price()
-    run_test() 
+    test_singlestep_circle_price() 

@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from exam_pydantic_ai.async_model import get_gpt_model
+from exam_pai_simple.async_model import get_gpt_model
 
 def run_gpt_conversation():
     """Demonstrate a contextual conversation using GPT model."""

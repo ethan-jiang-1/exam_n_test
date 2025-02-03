@@ -6,7 +6,7 @@ import sys
 if "./" not in sys.path:
     sys.path.append("./")
 
-from exam_pydantic_ai.async_model import get_qwen_model
+from exam_pai_simple.async_model import get_qwen_model
 
 def run_qwen_query():
     """Run a simple query using Qwen model."""

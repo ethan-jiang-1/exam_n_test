@@ -23,11 +23,10 @@ def test_multisteps_weather():
     user_input = "北京今天天气怎么样？"
     print_user_input(user_input)
     
-    # 第一次调用，使用tool_choice强制使用函数
+    # 第一次调用，删除tool_choice参数
     response = caller.call_with_conversation(
         user_input,
-        system_message="请使用get_weather函数查询北京的天气。",
-        tool_choice={"type": "function", "function": {"name": "get_weather"}}
+        system_message="请使用get_weather函数查询北京的天气。"
     )
     
     print_request_data(caller.last_request)
@@ -51,11 +50,10 @@ def test_multisteps_weather():
     user_input = "查询东京(JP)的天气"
     print_user_input(user_input)
     
-    # 第二次调用，使用tool_choice强制使用函数
+    # 第二次调用，删除tool_choice参数
     response = caller.call_with_conversation(
         user_input,
-        system_message="请使用get_weather函数查询东京的天气。",
-        tool_choice={"type": "function", "function": {"name": "get_weather"}}
+        system_message="请使用get_weather函数查询东京的天气。"
     )
     
     print_request_data(caller.last_request)

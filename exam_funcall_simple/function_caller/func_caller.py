@@ -143,7 +143,7 @@ class GPTFunctionCaller(GPTBase):
                 message = response.choices[0].message
                 
                 # 处理tool_calls
-                if message.tool_calls:
+                while message.tool_calls:
                     for tool_call in message.tool_calls:
                         handle_conversation_tool_call(
                             tool_call,
@@ -152,16 +152,39 @@ class GPTFunctionCaller(GPTBase):
                             self.logger
                         )
                     
-                    # 如果有函数调用结果，再次调用模型生成最终响应
-                    final_response = self.client.chat.completions.create(
+                    # 生成新的响应
+                    response = self.client.chat.completions.create(
                         model=GPT4_DEPLOYMENT_NAME,
-                        messages=messages
+                        messages=messages,
+                        tools=[{"type": "function", "function": f} for f in self.functions],
+                        tool_choice="auto"
                     )
-                    response = final_response
+                    
+                    if response.choices and response.choices[0].message:
+                        message = response.choices[0].message
+                        if not message.tool_calls:
+                            # 如果没有更多的函数调用，添加最终响应到消息历史
+                            messages.append({
+                                "role": "assistant",
+                                "content": message.content,
+                                "tool_calls": None
+                            })
+                    else:
+                        break
             
             # 记录耗时
             self.execution_time = time.time() - start_time
             self._log_debug(LogType.TIMING, f"{self.execution_time:.2f} 秒")
+            
+            # 返回最后一个响应，但保持tool_calls字段
+            if response.choices and response.choices[0].message:
+                message = response.choices[0].message
+                if not message.tool_calls:
+                    # 如果最后一个响应没有tool_calls，我们需要从历史中找到最后一个带有tool_calls的消息
+                    for msg in reversed(messages):
+                        if msg.get("role") == "assistant" and msg.get("tool_calls"):
+                            response.choices[0].message.tool_calls = msg["tool_calls"]
+                            break
             
             return response
             

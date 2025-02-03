@@ -58,7 +58,7 @@ def handle_conversation_tool_call(
         # 将函数调用结果添加到消息历史
         messages.append({
             "role": "assistant",
-            "content": None,
+            "content": "",
             "tool_calls": [tool_call]
         })
         messages.append({
@@ -66,4 +66,10 @@ def handle_conversation_tool_call(
             "tool_call_id": tool_call.id,
             "name": func_name,
             "content": str(function_response)
+        })
+        # 添加一个空的assistant消息，允许模型继续对话
+        messages.append({
+            "role": "assistant",
+            "content": "",
+            "tool_calls": None
         }) 

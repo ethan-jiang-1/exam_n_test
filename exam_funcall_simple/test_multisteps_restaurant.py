@@ -25,7 +25,7 @@ def test_multisteps_restaurant():
     
     response = caller.call_with_conversation(
         user_input,
-        system_message="请使用search_restaurants函数搜索餐厅。"
+        system_message="请务必使用search_restaurants函数搜索餐厅，并返回工具调用结果。"
     )
     
     print_request_data(caller.last_request)
@@ -52,7 +52,7 @@ def test_multisteps_restaurant():
     
     response = caller.call_with_conversation(
         user_input,
-        system_message="请使用search_restaurants函数搜索高档意大利餐厅。"
+        system_message="请务必使用search_restaurants函数搜索高档意大利餐厅，并返回工具调用结果。"
     )
     
     print_request_data(caller.last_request)
